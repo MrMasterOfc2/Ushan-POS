@@ -1133,17 +1133,7 @@
     
     document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
 
-    // Function to open item name popup - REQUIRES PIN IF SYSTEM IS LOCKED
-    function openItemNamePopup(id) {
-        if (isLocked) {
-            alert("⚠️ භාණ්ඩයේ නම වෙනස් කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
-            return;
-        }
-        itemToEdit = id;
-        document.getElementById('newItemName').value = inventory.find(i => i.id === id).name;
-        document.getElementById('itemNamePopup').style.display = 'flex';
-        document.getElementById('newItemName').focus();
-    }
+
     
     function confirmItemNameChange() {
         if (!itemToEdit) return;
