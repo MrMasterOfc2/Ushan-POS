@@ -160,7 +160,7 @@
             flex-direction: column;
         }
         
-        /* --- SETTINGS STYLES (UPDATED FOR RESPONSIVENESS) --- */
+        /* --- SETTINGS STYLES (Responsive) --- */
         .settings-container {
             flex: 1;
             background: var(--bg-primary);
@@ -177,12 +177,12 @@
         .settings-layout {
             display: flex;
             gap: 20px;
-            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+            flex-wrap: wrap; 
         }
 
         .settings-card {
             flex: 1;
-            min-width: 300px; /* Won't shrink below this */
+            min-width: 300px; 
             padding: 20px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -239,7 +239,6 @@
             border-color: var(--main-blue);
         }
 
-        /* Readonly inputs look different */
         .form-input[readonly] {
             background-color: var(--bg-secondary);
             cursor: not-allowed;
@@ -264,6 +263,7 @@
         .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
         .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
         .btn-print { background: #607d8b; color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; }
+        .btn-undo { background: #e53935; color: white; margin-left: auto; } /* Undo Button Style */
 
         /* Table */
         .scroll-box {
@@ -280,11 +280,7 @@
         tr:hover { background: var(--bg-secondary); cursor: pointer; }
         .selected-row { background: rgba(57, 73, 171, 0.1) !important; border-left: 3px solid var(--main-blue); }
 
-        /* Low Stock Alert Style */
-        .low-stock-text {
-            color: var(--error-red) !important;
-            font-weight: bold;
-        }
+        .low-stock-text { color: var(--error-red) !important; font-weight: bold; }
 
         /* Popups */
         .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
@@ -304,48 +300,21 @@
         .summary-row.discount-row { color: var(--discount-color); }
         .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
 
-        /* Theme Toggle & Stats */
         .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
-        /* --- PRINT STYLES (Device Connection) --- */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printableReceipt, #printableReceipt * {
-                visibility: visible;
-            }
-            #printableReceipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 0;
-                color: black;
-                background: white;
-            }
-            .popup-overlay, header, .nav-tabs, .btn {
-                display: none !important;
-            }
+            body * { visibility: hidden; }
+            #printableReceipt, #printableReceipt * { visibility: visible; }
+            #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; color: black; background: white; }
+            .popup-overlay, header, .nav-tabs, .btn { display: none !important; }
         }
 
-        #printableReceipt {
-            display: none;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 10px;
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-        }
+        #printableReceipt { display: none; font-family: 'Courier New', Courier, monospace; padding: 10px; width: 100%; max-width: 300px; margin: 0 auto; }
 
-        /* Responsive Breakpoint */
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
             .billing-section, .stock-form-section, .stock-history-section, .settings-container { min-width: 100%; }
-            
-            /* Responsive adjustment for Settings Cards */
             .settings-layout { flex-direction: column; }
             .settings-card { width: 100%; min-width: auto; }
         }
@@ -369,8 +338,9 @@
 
 <div id="pos-view" class="view-section active-view">
     <section class="inventory-section">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="text" id="searchInput" class="search-bar" placeholder="භාණ්ඩයේ නම සෙවීම හෝ Scan කරන්න..." onkeyup="searchItem()">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+            <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Scan Barcode or Type Name..." onkeyup="handleSearchInput(event)">
+            
             <button id="lockBtn" class="btn btn-lock" onclick="handleSecurity()">
                 <span class="btn-icon">🔒</span> Unlock
             </button>
@@ -380,7 +350,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>ID / Barcode</th>
                         <th>භාණ්ඩයේ නම</th>
                         <th>මිල</th>
                         <th>ස්ටොක්</th>
@@ -391,12 +361,18 @@
             </table>
         </div>
         <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
-            <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න
+            <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න (Select & Add)
         </button>
     </section>
 
     <section class="billing-section">
-        <h2 style="margin-top: 0;">වත්මන් බිල</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin-top: 0;">වත්මන් බිල</h2>
+            <button class="btn btn-undo" onclick="undoLastItem()" title="Remove last scanned item">
+                ↩ Undo Last
+            </button>
+        </div>
+        
         <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none;">
             <ul id="cartList" style="list-style: none; padding: 0;"></ul>
         </div>
@@ -433,9 +409,9 @@
         <h2 style="margin-top: 0; color: var(--main-blue);">ස්ටොක් / අලුත් අයිතම</h2>
         
         <div class="form-group">
-            <label>භාණ්ඩයේ ID අංකය:</label>
-            <input type="number" id="stockItemId" class="form-input" placeholder="ID (උදා: 1 හෝ අලුත් අංකයක්)" oninput="fillItemName()">
-            <small style="color: #666;">* අලුත් ID එකක් නම් ඔබට අලුත් අයිතමයක් සෑදිය හැක.</small>
+            <label>භාණ්ඩයේ ID / Barcode:</label>
+            <input type="number" id="stockItemId" class="form-input" placeholder="Scan Barcode here..." onkeyup="handleStockInput(event)">
+            <small style="color: #666;">* Barcode එක Scan කරන්න හෝ ID එක Type කර Enter ඔබන්න.</small>
         </div>
         
         <div class="form-group">
@@ -451,7 +427,6 @@
         <div class="form-group">
             <label>විකුණුම් මිල (Selling Price):</label>
             <input type="number" id="stockPrice" class="form-input" placeholder="පාරිභෝගික මිල (Rs)" min="0" step="0.01">
-            <small style="color: #666;">* නව අයිතමයක් සඳහා අනිවාර්යයි.</small>
         </div>
 
         <div class="form-group">
@@ -503,7 +478,6 @@
         <div class="settings-layout">
             <div class="settings-card">
                 <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම</h3>
-                
                 <div class="form-group">
                     <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
                     <select id="paperSizeSelect" onchange="saveSettings()">
@@ -512,12 +486,10 @@
                     </select>
                     <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
                 </div>
-
                 <button class="btn btn-print" onclick="testPrint()">
                     <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
                 </button>
             </div>
-
             <div class="settings-card info-card">
                 <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
                 <ol style="line-height: 1.6; padding-left: 20px;">
@@ -556,10 +528,7 @@
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
         <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
-        
-        <div id="receiptPreviewBox" style="max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ccc; padding: 10px; background: #fff;">
-            </div>
-
+        <div id="receiptPreviewBox" style="max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ccc; padding: 10px; background: #fff;"></div>
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="printReceipt()" style="background: var(--main-blue);">🖨️ Print Receipt</button>
             <button class="btn-cancel" onclick="closeReceiptPopup()">වසන්න (Close)</button>
@@ -584,7 +553,6 @@
     let isDarkMode = false;
     let paperSize = '80mm';
 
-    // Initialize System
     function initialize() {
         const savedTheme = localStorage.getItem('chandana_theme');
         if (savedTheme === 'dark') enableDarkMode();
@@ -593,7 +561,6 @@
         if (savedInv) {
             inventory = JSON.parse(savedInv);
         } else {
-            // Default items
             for (let i = 1; i <= 200; i++) {
                 inventory.push({ id: i, name: "අයිතමය " + i, cost: 100, price: 150, stock: 50 });
             }
@@ -613,6 +580,11 @@
 
         renderTable();
         renderStockHistory();
+        
+        // Auto focus on POS search on load
+        if(document.getElementById('pos-view').classList.contains('active-view')) {
+            document.getElementById('searchInput').focus();
+        }
     }
 
     function saveToStorage() {
@@ -621,73 +593,72 @@
         localStorage.setItem('chandana_paper_size', paperSize);
     }
 
-    // --- Navigation System ---
     function switchView(viewName) {
-        document.getElementById('pos-view').classList.remove('active-view');
-        document.getElementById('stock-view').classList.remove('active-view');
-        document.getElementById('settings-view').classList.remove('active-view');
-        
-        document.getElementById('tab-pos').classList.remove('active');
-        document.getElementById('tab-stock').classList.remove('active');
-        document.getElementById('tab-settings').classList.remove('active');
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(viewName + '-view').classList.add('active-view');
+        document.getElementById('tab-' + viewName).classList.add('active');
 
         if (viewName === 'pos') {
-            document.getElementById('pos-view').classList.add('active-view');
-            document.getElementById('tab-pos').classList.add('active');
-            renderTable(); 
+            renderTable();
+            document.getElementById('searchInput').focus(); // Auto focus for scanning
         } else if (viewName === 'stock') {
-            document.getElementById('stock-view').classList.add('active-view');
-            document.getElementById('tab-stock').classList.add('active');
             renderStockHistory();
-        } else if (viewName === 'settings') {
-            document.getElementById('settings-view').classList.add('active-view');
-            document.getElementById('tab-settings').classList.add('active');
+            document.getElementById('stockItemId').focus(); // Auto focus for stock scanning
         }
     }
 
-    // --- Settings & Printing Logic ---
     function saveSettings() {
         paperSize = document.getElementById('paperSizeSelect').value;
         saveToStorage();
     }
 
-    function testPrint() {
-        const testContent = `
-            <div style="text-align:center; font-weight:bold;">TEST PRINT</div>
-            <div style="text-align:center;">CHANDANA STORES</div>
-            <hr>
-            <div>Printer Connection: OK</div>
-            <div>Time: ${new Date().toLocaleTimeString()}</div>
-            <hr>
-            <div style="text-align:center;">Thank You!</div>
-        `;
-        document.getElementById('printableReceipt').innerHTML = testContent;
-        adjustPrintStyles();
-        window.print(); // Opens System Dialog to Select Device
+    /* --- SCANNER & SEARCH LOGIC (UPDATED) --- */
+    
+    // POS View: Handle Search Input (acts as Scanner Listener)
+    function handleSearchInput(event) {
+        let val = document.getElementById('searchInput').value;
+        
+        // 1. If Enter key is pressed (Scanner usually sends Enter at the end)
+        if (event.key === "Enter") {
+            let exactMatch = inventory.find(i => i.id == val);
+            
+            if (exactMatch) {
+                // It is a barcode scan (exact ID match) -> Add to cart immediately
+                addToCart(exactMatch.id);
+                document.getElementById('searchInput').value = ""; // Clear for next scan
+                renderTable(); // Reset filter
+            }
+            return;
+        }
+
+        // 2. Normal typing search (Filter table)
+        searchItem();
     }
 
-    function adjustPrintStyles() {
-        // Adjust width based on settings
-        const container = document.getElementById('printableReceipt');
-        if (paperSize === '58mm') {
-            container.style.maxWidth = '48mm'; // Approximate for 58mm printer margin
-            container.style.fontSize = '12px';
+    // Stock View: Handle ID Input (acts as Scanner Listener)
+    function handleStockInput(event) {
+        if (event.key === "Enter") {
+            fillItemName(); // Fill details on scan
         } else {
-            container.style.maxWidth = '72mm'; // Approximate for 80mm printer
-            container.style.fontSize = '14px';
+            // Optional: Live search if needed, but for scanners Enter is best
+            fillItemName();
         }
     }
 
-    function printReceipt() {
-        const content = document.getElementById('receiptPreviewBox').innerHTML;
-        document.getElementById('printableReceipt').innerHTML = content;
-        adjustPrintStyles();
-        window.print(); 
+    function searchItem() {
+        let f = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
+        for (let r of rows) r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none";
     }
 
-    // --- Stock Management Logic ---
+    /* --- STOCK LOGIC --- */
+
     function fillItemName() {
         const id = parseInt(document.getElementById('stockItemId').value);
+        if(!id) return;
+
         const item = inventory.find(i => i.id === id);
         const nameField = document.getElementById('stockItemName');
         const priceField = document.getElementById('stockPrice');
@@ -698,11 +669,10 @@
             priceField.value = item.price;
             costField.value = item.cost;
         } else {
-            if(nameField.value === "සොයාගත නොහැක" || nameField.value.startsWith("අයිතමය")) {
-                nameField.value = "";
-                priceField.value = "";
-                costField.value = "";
-            }
+            // New Item
+            nameField.value = "";
+            priceField.value = "";
+            costField.value = "";
         }
     }
 
@@ -730,13 +700,7 @@
             if (!name) return alert("නව අයිතමයක් සඳහා 'නම' ඇතුළත් කිරීම අනිවාර්යයි.");
             if (!price) return alert("නව අයිතමයක් සඳහා 'විකුණුම් මිල' ඇතුළත් කිරීම අනිවාර්යයි.");
             
-            const newItem = {
-                id: id,
-                name: name,
-                cost: cost,
-                price: price,
-                stock: qty
-            };
+            const newItem = { id: id, name: name, cost: cost, price: price, stock: qty };
             inventory.push(newItem);
             inventory.sort((a, b) => a.id - b.id);
             alert(`නව අයිතමය සාර්ථකව ඇතුළත් කරන ලදී: ${name}`);
@@ -757,6 +721,9 @@
         document.getElementById('stockQty').value = '';
         document.getElementById('stockCost').value = '';
         document.getElementById('stockPrice').value = '';
+        
+        // Re-focus for next scan
+        document.getElementById('stockItemId').focus();
 
         saveToStorage();
         renderStockHistory();
@@ -766,52 +733,33 @@
         const body = document.getElementById('stockHistoryBody');
         let totalInvestment = 0;
         let totalItems = 0;
-
         body.innerHTML = stockHistory.map(log => {
             totalInvestment += log.totalCost;
             totalItems += log.qty;
-            return `
-                <tr>
+            return `<tr>
                     <td style="font-size: 13px;">${log.date}</td>
                     <td>ID: ${log.itemId} - ${log.itemName}</td>
                     <td style="color: var(--success-green); font-weight: bold;">+${log.qty}</td>
                     <td>${log.unitCost.toFixed(2)}</td>
                     <td>${log.totalCost.toFixed(2)}</td>
-                </tr>
-            `;
+                </tr>`;
         }).join('');
-
         document.getElementById('totalStockInvestment').innerText = "Rs. " + totalInvestment.toFixed(2);
         document.getElementById('totalStockItemsAdded').innerText = totalItems;
     }
 
-    // --- POS Logic ---
-    function enableDarkMode() {
-        document.body.classList.add('dark-mode');
-        isDarkMode = true;
-        document.getElementById('themeToggle').innerText = '☀️';
-        localStorage.setItem('chandana_theme', 'dark');
-    }
-    function enableLightMode() {
-        document.body.classList.remove('dark-mode');
-        isDarkMode = false;
-        document.getElementById('themeToggle').innerText = '🌙';
-        localStorage.setItem('chandana_theme', 'light');
-    }
-    document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
+    /* --- POS CART LOGIC (UPDATED WITH SCAN & UNDO) --- */
 
     function renderTable() {
         const body = document.getElementById('inventoryBody');
         body.innerHTML = inventory.map(item => {
             const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
-            return `
-            <tr onclick="selectRow(${item.id})" id="row-${item.id}">
+            return `<tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
                 <td onclick="openItemNamePopup(${item.id})">${item.name}</td>
                 <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
                 <td class="${lowStockClass}" onclick="directEdit(${item.id}, 'stock')">${item.stock}</td>
-            </tr>
-            `;
+            </tr>`;
         }).join('');
     }
 
@@ -822,19 +770,39 @@
         if (row) row.classList.add('selected-row');
     }
 
-    function addToCart() {
-        if (!selectedId) return alert("භාණ්ඩයක් තෝරාගන්න!");
-        let item = inventory.find(i => i.id === selectedId);
+    // Updated addToCart to accept an ID (for Scanning)
+    function addToCart(scanId = null) {
+        let idToAdd = scanId ? scanId : selectedId;
+
+        if (!idToAdd) return alert("භාණ්ඩයක් තෝරාගන්න!");
+        let item = inventory.find(i => i.id === idToAdd);
+        
+        if(!item) return; // Should not happen if scanned correctly
+        
         if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
         
         cart.push({ ...item, discount: 0 });
         updateCartUI();
+        
+        // Scroll cart to bottom to see new item
+        let cartContainer = document.getElementById('cartContainer');
+        cartContainer.scrollTop = cartContainer.scrollHeight;
     }
 
     function removeFromCart(index) {
         if (confirm("ඉවත් කරන්නද?")) {
             cart.splice(index, 1);
             updateCartUI();
+        }
+    }
+    
+    // NEW: Undo Function
+    function undoLastItem() {
+        if(cart.length > 0) {
+            cart.pop(); // Remove last item
+            updateCartUI();
+        } else {
+            alert("Undo කිරීමට භාණ්ඩ නොමැත!");
         }
     }
 
@@ -846,7 +814,6 @@
             let finalPrice = item.price - item.discount;
             grossTotal += item.price;
             totalDiscount += item.discount;
-            
             return `<li>
                     <div style="flex:1"><b>${idx+1}. ${item.name}</b></div>
                     <div style="text-align:right">
@@ -909,7 +876,55 @@
 
     function closeReceiptPopup() { document.getElementById('receiptPopup').style.display = 'none'; }
 
-    // --- Popup & Edit Functions ---
+    // --- Print Functions ---
+    function testPrint() {
+        const testContent = `
+            <div style="text-align:center; font-weight:bold;">TEST PRINT</div>
+            <div style="text-align:center;">CHANDANA STORES</div>
+            <hr>
+            <div>Printer Connection: OK</div>
+            <div>Time: ${new Date().toLocaleTimeString()}</div>
+            <hr>
+            <div style="text-align:center;">Thank You!</div>
+        `;
+        document.getElementById('printableReceipt').innerHTML = testContent;
+        adjustPrintStyles();
+        window.print();
+    }
+
+    function adjustPrintStyles() {
+        const container = document.getElementById('printableReceipt');
+        if (paperSize === '58mm') {
+            container.style.maxWidth = '48mm'; 
+            container.style.fontSize = '12px';
+        } else {
+            container.style.maxWidth = '72mm'; 
+            container.style.fontSize = '14px';
+        }
+    }
+
+    function printReceipt() {
+        const content = document.getElementById('receiptPreviewBox').innerHTML;
+        document.getElementById('printableReceipt').innerHTML = content;
+        adjustPrintStyles();
+        window.print(); 
+    }
+
+    // --- Misc Functions ---
+    function enableDarkMode() {
+        document.body.classList.add('dark-mode');
+        isDarkMode = true;
+        document.getElementById('themeToggle').innerText = '☀️';
+        localStorage.setItem('chandana_theme', 'dark');
+    }
+    function enableLightMode() {
+        document.body.classList.remove('dark-mode');
+        isDarkMode = false;
+        document.getElementById('themeToggle').innerText = '🌙';
+        localStorage.setItem('chandana_theme', 'light');
+    }
+    document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
+
     function openItemNamePopup(id) {
         if (isLocked) return;
         itemToEdit = id;
@@ -951,12 +966,6 @@
     }
     function closeDiscountPopup() { document.getElementById('discountPopup').style.display = 'none'; discountItemIndex = null; }
 
-    function searchItem() {
-        let f = document.getElementById('searchInput').value.toLowerCase();
-        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
-        for (let r of rows) r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none";
-    }
-
     function handleSecurity() {
         if (isLocked) {
             if (prompt("PIN (1234):") === "1234") {
@@ -982,7 +991,6 @@
         }
     }
 
-    // Keyboard support
     document.addEventListener('keydown', e => {
         if (document.getElementById('itemNamePopup').style.display === 'flex' && e.key === 'Enter') { confirmItemNameChange(); e.preventDefault(); }
         if (document.getElementById('discountPopup').style.display === 'flex' && e.key === 'Enter') { confirmDiscount(); e.preventDefault(); }
