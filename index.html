@@ -579,17 +579,6 @@
     </div>
 </div>
 
-<div id="itemNamePopup" class="popup-overlay">
-    <div class="popup-content">
-        <h3>භාණ්ඩයේ නම වෙනස් කරන්න</h3>
-        <input type="text" id="newItemName" class="popup-input">
-        <div class="popup-buttons">
-            <button class="btn-confirm" onclick="confirmItemNameChange()">අනුමත කරන්න</button>
-            <button class="btn-cancel" onclick="closeItemNamePopup()">අවලංගු කරන්න</button>
-        </div>
-    </div>
-</div>
-
 <div id="discountPopup" class="popup-overlay">
     <div class="popup-content">
         <h3>වට්ටම් ඇතුළත් කරන්න</h3>
@@ -677,7 +666,13 @@
         } else {
             // Sample items for initial testing
             for (let i = 1; i <= 50; i++) {
-                inventory.push({ id: i, name: "අයිතමය " + i, cost: Math.floor(Math.random() * 500) + 100, price: Math.floor(Math.random() * 800) + 150, stock: Math.floor(Math.random() * 100) + 10 });
+                inventory.push({ 
+                    id: i, 
+                    name: "අයිතමය " + i, 
+                    cost: Math.floor(Math.random() * 500) + 100, 
+                    price: Math.floor(Math.random() * 800) + 150, 
+                    stock: Math.floor(Math.random() * 100) + 10 
+                });
             }
             saveToStorage();
         }
@@ -748,13 +743,12 @@
         saveToStorage();
     }
 
-    /* --- SCANNER & SEARCH LOGIC (UPDATED) --- */
+    /* --- SCANNER & SEARCH LOGIC --- */
     
-    // POS View: Handle Search Input (acts as Scanner Listener)
     function handleSearchInput(event) {
         let val = document.getElementById('searchInput').value;
         
-        // 1. If Enter key is pressed (Scanner usually sends Enter at the end)
+        // If Enter key is pressed (Scanner usually sends Enter at the end)
         if (event.key === "Enter") {
             let exactMatch = inventory.find(i => i.id == val);
             
@@ -769,11 +763,10 @@
             return;
         }
 
-        // 2. Normal typing search (Filter table)
+        // Normal typing search (Filter table)
         searchItem();
     }
 
-    // Stock View: Handle ID Input (acts as Scanner Listener)
     function handleStockInput(event) {
         if (event.key === "Enter") {
             fillItemName(); // Fill details on scan
@@ -882,7 +875,7 @@
         document.getElementById('totalStockItemsAdded').innerText = totalItems;
     }
 
-    /* --- POS CART LOGIC (UPDATED WITH SCAN & UNDO) --- */
+    /* --- POS CART LOGIC --- */
 
     function renderTable() {
         const body = document.getElementById('inventoryBody');
@@ -904,14 +897,16 @@
         if (row) row.classList.add('selected-row');
     }
 
-    // Updated addToCart to accept an ID (for Scanning) - NO PIN REQUIRED
     function addToCart(scanId = null) {
         let idToAdd = scanId ? scanId : selectedId;
 
         if (!idToAdd) return alert("භාණ්ඩයක් තෝරාගන්න!");
         let item = inventory.find(i => i.id === idToAdd);
         
-        if(!item) return; // Should not happen if scanned correctly
+        if(!item) {
+            alert("භාණ්ඩය හමු නොවීය!");
+            return;
+        }
         
         if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
         
@@ -920,7 +915,13 @@
         if (existingItem) {
             existingItem.quantity = (existingItem.quantity || 1) + 1;
         } else {
-            cart.push({ ...item, discount: 0, quantity: 1 });
+            cart.push({ 
+                id: item.id, 
+                name: item.name, 
+                price: item.price, 
+                discount: 0, 
+                quantity: 1 
+            });
         }
         
         updateCartUI();
@@ -937,7 +938,6 @@
         }
     }
     
-    // NEW: Undo Function - NO PIN REQUIRED
     function undoLastItem() {
         if(cart.length > 0) {
             cart.pop(); // Remove last item
@@ -952,13 +952,14 @@
         let grossTotal = 0, totalDiscount = 0;
         
         list.innerHTML = cart.map((item, idx) => {
-            let finalPrice = (item.price - item.discount) * (item.quantity || 1);
-            grossTotal += item.price * (item.quantity || 1);
-            totalDiscount += item.discount * (item.quantity || 1);
+            let quantity = item.quantity || 1;
+            let finalPrice = (item.price - item.discount) * quantity;
+            grossTotal += item.price * quantity;
+            totalDiscount += item.discount * quantity;
             return `<li>
-                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${(item.quantity || 1) > 1 ? 'x' + (item.quantity || 1) : ''}</div>
+                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${quantity > 1 ? 'x' + quantity : ''}</div>
                     <div style="text-align:right">
-                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * (item.quantity || 1)).toFixed(2)}</span><span class="discount-label">-${(item.discount * (item.quantity || 1)).toFixed(2)}</span>` : ''}
+                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * quantity).toFixed(2)}</span><span class="discount-label">-${(item.discount * quantity).toFixed(2)}</span>` : ''}
                         <b>Rs. ${finalPrice.toFixed(2)}</b>
                     </div>
                     <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
@@ -978,7 +979,7 @@
         let gross = 0, dis = 0, net = 0;
         let date = new Date().toLocaleString('si-LK');
         
-        // Build receipt HTML for popup preview
+        // Build receipt HTML for popup preview AND printable receipt
         let receiptHTML = `
             <div style="text-align:center; margin-bottom:10px;">
                 <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
@@ -1052,7 +1053,7 @@
         document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
         document.getElementById('receiptPopup').style.display = 'flex';
         
-        // Prepare printable receipt
+        // Store receipt HTML for printing
         document.getElementById('printableReceipt').innerHTML = receiptHTML;
         
         // Clear cart and update UI
@@ -1066,7 +1067,7 @@
         document.getElementById('receiptPopup').style.display = 'none'; 
     }
 
-    // --- Print Functions ---
+    /* --- PRINT FUNCTIONS --- */
     function testPrint() {
         const testContent = `
             <div style="text-align:center; font-weight:bold; font-size:16px;">TEST PRINT</div>
@@ -1085,12 +1086,18 @@
 
     function adjustPrintStyles() {
         const container = document.getElementById('printableReceipt');
+        container.style.maxWidth = '80mm';
+        container.style.margin = '0 auto';
+        container.style.padding = '10px';
+        container.style.fontFamily = "'Courier New', Courier, monospace";
+        container.style.fontSize = '13px';
+        container.style.color = '#000';
+        container.style.backgroundColor = '#fff';
+        
+        // Adjust for paper size
         if (paperSize === '58mm') {
-            container.style.maxWidth = '48mm'; 
-            container.style.fontSize = '12px';
-        } else {
-            container.style.maxWidth = '72mm'; 
-            container.style.fontSize = '14px';
+            container.style.maxWidth = '50mm';
+            container.style.fontSize = '11px';
         }
     }
 
@@ -1099,20 +1106,8 @@
         window.print(); 
     }
 
-    /* --- SECURITY FUNCTIONS (UPDATED) --- */
+    /* --- SECURITY FUNCTIONS --- */
     
-    function handleSecurity() {
-        if (isLocked) {
-            // Show security popup to unlock system for editing
-            openSecurityPopup();
-        } else {
-            // Lock the system
-            isLocked = true;
-            updateLockButton();
-            alert("පද්ධතිය Lock කරන ලදී. දැන් භාණ්ඩවල නම, මිල හෝ ස්ටොක් ප්‍රමාණය වෙනස් කිරීමට අවසර නැත.");
-        }
-    }
-
     function openSecurityPopup() {
         document.getElementById('securityPopup').style.display = 'flex';
         document.getElementById('pinInput').value = '';
@@ -1157,7 +1152,7 @@
             pinAttempts = 0;
             
             // Show success message
-            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී! දැන් ඔබට භාණ්ඩවල නම, මිල සහ ස්ටොක් ප්‍රමාණය වෙනස් කිරීමට හැකිය.");
+            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී!");
             
         } else {
             // Wrong PIN
