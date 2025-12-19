@@ -160,16 +160,38 @@
             flex-direction: column;
         }
         
-        /* --- SETTINGS STYLES --- */
+        /* --- SETTINGS STYLES (UPDATED FOR RESPONSIVENESS) --- */
         .settings-container {
             flex: 1;
             background: var(--bg-primary);
             border-radius: 10px;
-            padding: 30px;
+            padding: 20px;
             border: 1px solid var(--border-color);
-            max-width: 800px;
+            max-width: 1000px;
+            width: 100%;
             margin: 0 auto;
             box-shadow: 0 2px 4px var(--shadow);
+            overflow-y: auto;
+        }
+
+        .settings-layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        }
+
+        .settings-card {
+            flex: 1;
+            min-width: 300px; /* Won't shrink below this */
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .settings-card.info-card {
+            background: var(--bg-secondary);
         }
 
         .form-group {
@@ -287,7 +309,6 @@
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
         /* --- PRINT STYLES (Device Connection) --- */
-        /* මෙය ක්‍රියාත්මක වන්නේ Print කරන විට පමණි */
         @media print {
             body * {
                 visibility: hidden;
@@ -305,25 +326,28 @@
                 color: black;
                 background: white;
             }
-            /* Hide scrollbars and extra UI */
             .popup-overlay, header, .nav-tabs, .btn {
                 display: none !important;
             }
         }
 
-        /* Printable Receipt Container (Hidden on screen usually) */
         #printableReceipt {
-            display: none; /* Hidden on screen, shown in print media or popup */
+            display: none;
             font-family: 'Courier New', Courier, monospace;
             padding: 10px;
             width: 100%;
-            max-width: 300px; /* Default for 80mm printer */
+            max-width: 300px;
             margin: 0 auto;
         }
 
+        /* Responsive Breakpoint */
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
             .billing-section, .stock-form-section, .stock-history-section, .settings-container { min-width: 100%; }
+            
+            /* Responsive adjustment for Settings Cards */
+            .settings-layout { flex-direction: column; }
+            .settings-card { width: 100%; min-width: auto; }
         }
     </style>
 </head>
@@ -476,31 +500,33 @@
         <h2 style="color: var(--main-blue);">උපාංග සකසුම් (Device Settings)</h2>
         <p>ඔබගේ මුද්‍රණ යන්ත්‍රය (Printer) සම්බන්ධ කිරීම සඳහා පහත උපදෙස් අනුගමනය කරන්න.</p>
         
-        <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 20px;">
-            <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම (Printer Setup)</h3>
-            
-            <div class="form-group">
-                <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
-                <select id="paperSizeSelect" onchange="saveSettings()">
-                    <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
-                    <option value="58mm">58mm (Small Thermal Printer)</option>
-                </select>
-                <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
+        <div class="settings-layout">
+            <div class="settings-card">
+                <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම</h3>
+                
+                <div class="form-group">
+                    <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
+                    <select id="paperSizeSelect" onchange="saveSettings()">
+                        <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
+                        <option value="58mm">58mm (Small Thermal Printer)</option>
+                    </select>
+                    <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
+                </div>
+
+                <button class="btn btn-print" onclick="testPrint()">
+                    <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
+                </button>
             </div>
 
-            <button class="btn btn-print" onclick="testPrint()">
-                <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
-            </button>
-        </div>
-
-        <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
-            <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
-            <ol style="line-height: 1.6;">
-                <li>ඔබේ POS Printer එක USB මගින් පරිගණකයට සම්බන්ධ කරන්න.</li>
-                <li>එහි ඩ්‍රයිවර් (Driver) පරිගණකයේ ස්ථාපනය කර ඇති බව තහවුරු කරගන්න.</li>
-                <li>ඉහත "Test Print" බොත්තම ඔබන්න.</li>
-                <li>එවිට පැමිණෙන කොටුවෙන් (System Dialog) ඔබේ ප්‍රින්ටරය (Example: POS-80) තෝරා Print කරන්න.</li>
-            </ol>
+            <div class="settings-card info-card">
+                <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
+                <ol style="line-height: 1.6; padding-left: 20px;">
+                    <li>ඔබේ POS Printer එක USB මගින් පරිගණකයට සම්බන්ධ කරන්න.</li>
+                    <li>එහි ඩ්‍රයිවර් (Driver) පරිගණකයේ ස්ථාපනය කර ඇති බව තහවුරු කරගන්න.</li>
+                    <li>ඉහත "Test Print" බොත්තම ඔබන්න.</li>
+                    <li>එවිට පැමිණෙන කොටුවෙන් (System Dialog) ඔබේ ප්‍රින්ටරය තෝරා Print කරන්න.</li>
+                </ol>
+            </div>
         </div>
     </div>
 </div>
@@ -619,7 +645,7 @@
         }
     }
 
-    // --- Settings & Printing Logic (NEW) ---
+    // --- Settings & Printing Logic ---
     function saveSettings() {
         paperSize = document.getElementById('paperSizeSelect').value;
         saveToStorage();
@@ -653,17 +679,13 @@
     }
 
     function printReceipt() {
-        // The receipt content is already generated in 'checkout' inside 'receiptPreviewBox'
-        // We copy it to the printable area
         const content = document.getElementById('receiptPreviewBox').innerHTML;
         document.getElementById('printableReceipt').innerHTML = content;
-        
         adjustPrintStyles();
-        window.print(); // This triggers the browser's print dialog to select the printer
+        window.print(); 
     }
 
     // --- Stock Management Logic ---
-    
     function fillItemName() {
         const id = parseInt(document.getElementById('stockItemId').value);
         const item = inventory.find(i => i.id === id);
@@ -764,7 +786,6 @@
     }
 
     // --- POS Logic ---
-
     function enableDarkMode() {
         document.body.classList.add('dark-mode');
         isDarkMode = true;
@@ -880,11 +901,7 @@
         `;
         
         document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
-        
-        // Populate Preview
         document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
-        
-        // Show Popup
         document.getElementById('receiptPopup').style.display = 'flex';
         
         cart = []; updateCartUI(); saveToStorage(); renderTable();
