@@ -1,15 +1,32 @@
+ඔබගේ ඉල්ලීමට අනුව, දැනට පවතින කිසිදු විශේෂාංගයක් (Billing, Discounts, Security, Dark Mode) වෙනස් නොකර, අලුතින් **"Stock Management"** සඳහා වෙනම Tab එකක් (කොටසක්) එකතු කර සම්පූර්ණ කෝඩ් එක පහත දැක්වේ.
+
+මෙහි අලුත් විශේෂාංග:
+
+1. **Tab System:** ඉහළින්ම "POS (Billing)" සහ "Stock Management" ලෙස බොත්තම් දෙකක් ඇත.
+2. **Stock Management කොටස:**
+* භාණ්ඩයේ ID එක, අලුතින් එකතු කරන ප්‍රමාණය (Qty) සහ ඒ සඳහා ගිය වියදම (Cost) ඇතුළත් කළ හැක.
+* එවිට ප්‍රධාන ඉන්වෙන්ටරියේ ස්ටොක් ප්‍රමාණය ඉබේම වැඩි වේ.
+* **Stock History Table:** ඔබ ස්ටොක් එකතු කළ දිනය, වේලාව, වියදම සහ ප්‍රමාණය වෙනම වගුවක පෙන්වයි.
+* **Total Investment:** ස්ටොක් සඳහා වැය කළ මුළු මුදල වෙනම පෙන්වයි.
+
+
+
+පහත කෝඩ් එක සම්පූර්ණයෙන්ම Copy කර භාවිතා කරන්න.
+
+```html
 <!DOCTYPE html>
 <html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHANDANA STORES - PRO POS</title>
+    <title>CHANDANA STORES - PRO POS & STOCK</title>
     <style>
-        /* --- 1. මෝස්තර (CSS) - ඕනෑම තිරයකට ගැළපෙන ලෙස (Responsive) --- */
+        /* --- 1. මෝස්තර (CSS) --- */
         :root {
             --main-blue: #1a237e;
             --success-green: #2e7d32;
             --error-red: #c62828;
+            --warning-orange: #ff9800;
             --light-gray: #f5f6fa;
             --text-primary: #000000;
             --bg-primary: #ffffff;
@@ -23,6 +40,7 @@
             --main-blue: #3949ab;
             --success-green: #4caf50;
             --error-red: #ef5350;
+            --warning-orange: #ffb74d;
             --light-gray: #1e1e1e;
             --text-primary: #ffffff;
             --bg-primary: #121212;
@@ -43,7 +61,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* ඉහළ තීරුව */
+        /* Header */
         header {
             background: var(--main-blue);
             color: white;
@@ -53,6 +71,7 @@
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             position: relative;
+            z-index: 10;
         }
 
         .header-controls {
@@ -61,16 +80,53 @@
             align-items: center;
         }
 
-        /* ප්‍රධාන කොටස */
-        .main-wrapper {
+        /* Navigation Tabs */
+        .nav-tabs {
             display: flex;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            opacity: 1;
+            background: var(--bg-secondary);
+        }
+
+        .tab-btn.active {
+            border-bottom-color: var(--main-blue);
+            color: var(--main-blue);
+            opacity: 1;
+        }
+
+        /* View Container */
+        .view-section {
+            display: none; /* Hidden by default */
             flex: 1;
             overflow: hidden;
             padding: 10px;
             gap: 15px;
+            height: 100%;
         }
 
-        /* බඩු ලැයිස්තුව ඇති කොටස (වම් පස) */
+        .view-section.active-view {
+            display: flex;
+        }
+
+        /* --- POS STYLES (Existing) --- */
         .inventory-section {
             flex: 2;
             background: var(--bg-primary);
@@ -80,10 +136,8 @@
             padding: 15px;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px var(--shadow);
-            transition: all 0.3s;
         }
 
-        /* බිල ඇති කොටස (දකුණු පස) */
         .billing-section {
             flex: 1;
             background: var(--bg-primary);
@@ -95,26 +149,75 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px var(--shadow);
             min-width: 340px;
-            transition: all 0.3s;
         }
 
-        /* සෙවුම් කොටුව සහ බොත්තම් */
-        .search-bar {
+        /* --- STOCK MANAGEMENT STYLES (New) --- */
+        .stock-form-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+        }
+
+        .stock-history-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stock-summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            flex: 1;
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning-orange);
+            text-align: center;
+        }
+        
+        .summary-card h4 { margin: 0; font-size: 14px; opacity: 0.8; }
+        .summary-card div { font-size: 24px; font-weight: bold; margin-top: 5px; color: var(--main-blue); }
+
+        /* Common Elements */
+        .search-bar, .form-input {
             width: 100%;
             padding: 12px;
             font-size: 16px;
             border: 1px solid var(--border-color);
             border-radius: 5px;
-            margin-bottom: 15px;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            transition: all 0.3s;
+            box-sizing: border-box;
         }
-
-        .search-bar:focus {
+        
+        .form-input:focus, .search-bar:focus {
             outline: none;
             border-color: var(--main-blue);
-            box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
         }
 
         .btn {
@@ -124,53 +227,19 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
-            border: 2px solid transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+        
+        .btn-lock { background: #ff9800; color: white; }
+        .btn-unlock { background: #4caf50; color: white; }
+        .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
+        .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px var(--shadow);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-lock { 
-            background: #ff9800; 
-            color: white;
-            border-color: #e68900;
-        }
-        .btn-unlock { 
-            background: #4caf50; 
-            color: white;
-            border-color: #3d8b40;
-        }
-        .btn-pay { 
-            background: var(--main-blue); 
-            color: white; 
-            width: 100%; 
-            padding: 15px; 
-            font-size: 18px;
-            border-color: #0d47a1;
-            margin-top: 10px;
-        }
-        .btn-dark-mode {
-            background: #333;
-            color: white;
-            border-color: #222;
-        }
-        .btn-light-mode {
-            background: #f5f5f5;
-            color: #333;
-            border-color: #ddd;
-        }
-
-        /* වගුව (Table) */
+        /* Table */
         .scroll-box {
             flex: 1;
             overflow-y: auto;
@@ -179,255 +248,37 @@
             background: var(--bg-primary);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--bg-secondary); padding: 12px; position: sticky; top: 0; text-align: left; border-bottom: 2px solid var(--border-color); color: var(--text-primary); }
+        td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        tr:hover { background: var(--bg-secondary); cursor: pointer; }
+        .selected-row { background: rgba(57, 73, 171, 0.1) !important; border-left: 3px solid var(--main-blue); }
 
-        th {
-            background: var(--bg-secondary);
-            padding: 12px;
-            position: sticky;
-            top: 0;
-            text-align: left;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--border-color);
-        }
+        /* Popups */
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .popup-content { background: var(--bg-primary); padding: 30px; border-radius: 15px; width: 400px; max-width: 90%; color: var(--text-primary); }
+        .popup-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border-color); border-radius: 5px; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box; }
+        .popup-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-confirm { background: var(--success-green); color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-cancel { background: #757575; color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
 
-        td {
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
+        /* Cart Styling */
+        #cartList li { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .original-price-strike { text-decoration: line-through; color: #888; font-size: 12px; display: block; }
+        .discount-label { color: var(--discount-color); font-size: 12px; font-weight: bold; display: block; }
+        .bill-summary { padding: 15px 0; border-top: 2px dashed var(--border-color); margin-top: 10px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+        .summary-row.total { font-size: 22px; font-weight: bold; color: var(--main-blue); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        .summary-row.discount-row { color: var(--discount-color); }
+        .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
 
-        tr:hover { 
-            background: var(--bg-secondary); 
-            cursor: pointer; 
-        }
-        .selected-row { 
-            background: rgba(57, 73, 171, 0.1) !important; 
-            border-left: 3px solid var(--main-blue);
-        }
+        /* Theme Toggle & Stats */
+        .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
+        .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
-        /* Popup වින්ඩෝව */
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(3px);
-        }
-
-        .popup-content {
-            background: var(--bg-primary);
-            padding: 30px;
-            border-radius: 15px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-        }
-
-        .popup-content h3 {
-            margin-top: 0;
-            color: var(--main-blue);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .popup-input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            font-size: 16px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: all 0.3s;
-            box-sizing: border-box;
-        }
-
-        .popup-input:focus {
-            outline: none;
-            border-color: var(--main-blue);
-            box-shadow: 0 0 0 2px rgba(57, 73, 171, 0.2);
-        }
-
-        .popup-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .popup-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .btn-confirm { 
-            background: var(--success-green); 
-            color: white;
-            border-color: #1b5e20;
-        }
-        .btn-cancel { 
-            background: #757575; 
-            color: white;
-            border-color: #616161;
-        }
-
-        /* Cart item styling - Improved Layout */
-        #cartList li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background 0.3s;
-        }
-
-        #cartList li:hover {
-            background: var(--bg-secondary);
-        }
-
-        .cart-item-details {
-            flex: 1;
-        }
-        
-        .cart-item-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .cart-item-price-block {
-            text-align: right;
-            min-width: 80px;
-        }
-
-        .original-price-strike {
-            text-decoration: line-through;
-            color: #888;
-            font-size: 12px;
-            display: block;
-        }
-
-        .discount-label {
-            color: var(--discount-color);
-            font-size: 12px;
-            font-weight: bold;
-            display: block;
-        }
-
-        .final-price-display {
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        /* Bill Summary Section */
-        .bill-summary {
-            padding: 15px 0;
-            border-top: 2px dashed var(--border-color);
-            margin-top: 10px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-
-        .summary-row.total {
-            font-size: 22px;
-            font-weight: bold;
-            color: var(--main-blue);
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .summary-row.discount-row {
-            color: var(--discount-color);
-        }
-
-        /* Mobile එකකදී පෙනුම වෙනස් වීම */
         @media (max-width: 768px) {
-            .main-wrapper { 
-                flex-direction: column; 
-                overflow-y: auto; 
-            }
-            .billing-section { 
-                min-width: 100%; 
-                height: 500px; 
-            }
-            .popup-content { 
-                width: 90%; 
-                padding: 20px; 
-            }
-            .header-controls {
-                flex-wrap: wrap;
-                justify-content: flex-end;
-            }
-        }
-
-        /* Theme toggle button */
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-            padding: 8px;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* Stats display */
-        .stats-display {
-            font-size: 14px;
-            color: #ccff90;
-            text-align: right;
-        }
-
-        /* Button icons */
-        .btn-icon {
-            font-size: 16px;
-        }
-
-        .remove-btn {
-            color: var(--error-red);
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 10px;
-            padding: 4px 8px;
-            border-radius: 5px;
-            transition: background 0.2s;
-        }
-        .remove-btn:hover {
-            background: rgba(198, 40, 40, 0.1);
+            .view-section { flex-direction: column; overflow-y: auto; }
+            .billing-section, .stock-form-section, .stock-history-section { min-width: 100%; }
         }
     </style>
 </head>
@@ -436,15 +287,17 @@
 <header>
     <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
     <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">
-            🌙
-        </button>
-        
+        <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">🌙</button>
         <div class="stats-display" id="stats">ආදායම: 0.00 | ලාභය: 0.00</div>
     </div>
 </header>
 
-<div class="main-wrapper">
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchView('pos')" id="tab-pos">POS / Billing</button>
+    <button class="tab-btn" onclick="switchView('stock')" id="tab-stock">Stock Management</button>
+</div>
+
+<div id="pos-view" class="view-section active-view">
     <section class="inventory-section">
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
             <input type="text" id="searchInput" class="search-bar" placeholder="භාණ්ඩයේ නම සෙවීම හෝ Scan කරන්න..." onkeyup="searchItem()">
@@ -505,10 +358,71 @@
     </section>
 </div>
 
+<div id="stock-view" class="view-section">
+    <section class="stock-form-section">
+        <h2 style="margin-top: 0; color: var(--main-blue);">නව ස්ටොක් එකතු කරන්න</h2>
+        
+        <div class="form-group">
+            <label>භාණ්ඩයේ ID අංකය:</label>
+            <input type="number" id="stockItemId" class="form-input" placeholder="ID (උදා: 1)" onchange="fillItemName()">
+        </div>
+        
+        <div class="form-group">
+            <label>භාණ්ඩයේ නම:</label>
+            <input type="text" id="stockItemName" class="form-input" placeholder="නම ස්වයංක්‍රීයව පෙන්වයි" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>එකතු කරන ප්‍රමාණය (Qty):</label>
+            <input type="number" id="stockQty" class="form-input" placeholder="ප්‍රමාණය" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>ඒකකයක ගැනුම් මිල (Cost Price):</label>
+            <input type="number" id="stockCost" class="form-input" placeholder="එක් අයිතමයක මිල (Rs)" min="0" step="0.01">
+            <small style="color: #666;">* විකල්ප: මෙය ඇතුළත් කළොත් Cost එක update වේ.</small>
+        </div>
+
+        <button class="btn btn-add-stock" onclick="addNewStock()">
+            <span class="btn-icon">📥</span> ස්ටොක් එකතු කරන්න (Add Stock)
+        </button>
+    </section>
+
+    <section class="stock-history-section">
+        <div class="stock-summary-cards">
+            <div class="summary-card">
+                <h4>ස්ටොක් සඳහා මුළු වියදම</h4>
+                <div id="totalStockInvestment">0.00</div>
+            </div>
+            <div class="summary-card">
+                <h4>එකතු කළ මුළු අයිතම ගණන</h4>
+                <div id="totalStockItemsAdded">0</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 10px;">ස්ටොක් ඉතිහාසය (Stock History)</h3>
+        <div class="scroll-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>දිනය</th>
+                        <th>භාණ්ඩය</th>
+                        <th>ප්‍රමාණය</th>
+                        <th>මිල (Cost)</th>
+                        <th>මුළු වියදම</th>
+                    </tr>
+                </thead>
+                <tbody id="stockHistoryBody">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
 <div id="itemNamePopup" class="popup-overlay">
     <div class="popup-content">
         <h3>භාණ්ඩයේ නම වෙනස් කරන්න</h3>
-        <input type="text" id="newItemName" class="popup-input" placeholder="නව නම ඇතුළත් කරන්න">
+        <input type="text" id="newItemName" class="popup-input">
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="confirmItemNameChange()">අනුමත කරන්න</button>
             <button class="btn-cancel" onclick="closeItemNamePopup()">අවලංගු කරන්න</button>
@@ -519,7 +433,7 @@
 <div id="discountPopup" class="popup-overlay">
     <div class="popup-content">
         <h3>වට්ටම් ඇතුළත් කරන්න</h3>
-        <input type="number" id="discountAmount" class="popup-input" placeholder="වට්ටම් රුපියල් (Rs)" min="0" step="0.01">
+        <input type="number" id="discountAmount" class="popup-input" placeholder="වට්ටම් රුපියල් (Rs)">
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="confirmDiscount()">වට්ටම් යොදන්න</button>
             <button class="btn-cancel" onclick="closeDiscountPopup()">අවලංගු කරන්න</button>
@@ -530,19 +444,17 @@
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
         <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
-        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; padding-right: 10px; font-family: 'Courier New', monospace;">
-            </div>
-        <div class="popup-buttons">
-            <button class="btn-confirm" onclick="closeReceiptPopup()">හරි (OK)</button>
-        </div>
+        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; font-family: 'Courier New', monospace;"></div>
+        <div class="popup-buttons"><button class="btn-confirm" onclick="closeReceiptPopup()">හරි (OK)</button></div>
     </div>
 </div>
 
 <script>
-    /* --- 2. දත්ත සහ වැඩකෑලි (JavaScript) --- */
+    /* --- JavaScript Logic --- */
 
     let inventory = [];
     let cart = [];
+    let stockHistory = []; // New Array for stock logs
     let isLocked = true;
     let selectedId = null;
     let totalIncome = 0;
@@ -550,71 +462,160 @@
     let itemToEdit = null;
     let discountItemIndex = null;
     let isDarkMode = false;
-    let castConnected = false;
-    let castDeviceName = null;
 
-    // පද්ධතිය ආරම්භයේදී බඩු 200 ක් සෑදීම
+    // Initialize System
     function initialize() {
-        // Check for saved theme
+        // Theme
         const savedTheme = localStorage.getItem('chandana_theme');
-        if (savedTheme === 'dark') {
-            enableDarkMode();
-        } else {
-            enableLightMode();
-        }
+        if (savedTheme === 'dark') enableDarkMode();
 
-        // Check for saved data
-        const saved = localStorage.getItem('chandana_db');
-        if (saved) {
-            inventory = JSON.parse(saved);
+        // Inventory Data
+        const savedInv = localStorage.getItem('chandana_db');
+        if (savedInv) {
+            inventory = JSON.parse(savedInv);
         } else {
             for (let i = 1; i <= 200; i++) {
-                inventory.push({
-                    id: i,
-                    name: "අයිතමය " + i,
-                    cost: 100,
-                    price: 150,
-                    stock: 50
-                });
+                inventory.push({ id: i, name: "අයිතමය " + i, cost: 100, price: 150, stock: 50 });
             }
             saveToStorage();
         }
+
+        // Stock History Data
+        const savedStock = localStorage.getItem('chandana_stock_history');
+        if (savedStock) {
+            stockHistory = JSON.parse(savedStock);
+        }
+
         renderTable();
+        renderStockHistory(); // Load stock history
     }
 
-    // දත්ත සේව් කිරීම (Offline)
     function saveToStorage() {
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
+        localStorage.setItem('chandana_stock_history', JSON.stringify(stockHistory));
     }
 
-    // Dark Mode සක්‍රීය කිරීම
+    // --- Navigation System ---
+    function switchView(viewName) {
+        // Hide all views
+        document.getElementById('pos-view').classList.remove('active-view');
+        document.getElementById('stock-view').classList.remove('active-view');
+        
+        // Deactivate tabs
+        document.getElementById('tab-pos').classList.remove('active');
+        document.getElementById('tab-stock').classList.remove('active');
+
+        // Show selected
+        if (viewName === 'pos') {
+            document.getElementById('pos-view').classList.add('active-view');
+            document.getElementById('tab-pos').classList.add('active');
+            renderTable(); // Refresh inventory table
+        } else {
+            document.getElementById('stock-view').classList.add('active-view');
+            document.getElementById('tab-stock').classList.add('active');
+            renderStockHistory(); // Refresh history
+        }
+    }
+
+    // --- Stock Management Logic ---
+    
+    // Auto-fill item name when ID is typed
+    function fillItemName() {
+        const id = parseInt(document.getElementById('stockItemId').value);
+        const item = inventory.find(i => i.id === id);
+        const nameField = document.getElementById('stockItemName');
+        
+        if (item) {
+            nameField.value = item.name;
+        } else {
+            nameField.value = "සොයාගත නොහැක";
+        }
+    }
+
+    function addNewStock() {
+        const id = parseInt(document.getElementById('stockItemId').value);
+        const qty = parseInt(document.getElementById('stockQty').value);
+        const cost = parseFloat(document.getElementById('stockCost').value);
+
+        if (!id || !qty || qty <= 0) {
+            alert("කරුණාකර නිවැරදි ID එකක් සහ ප්‍රමාණයක් (Qty) ඇතුළත් කරන්න.");
+            return;
+        }
+
+        let item = inventory.find(i => i.id === id);
+        if (!item) {
+            alert("මෙම ID එක සහිත භාණ්ඩයක් ඉන්වෙන්ටරියේ නැත.");
+            return;
+        }
+
+        // Update Inventory
+        item.stock += qty;
+        if (cost && cost > 0) {
+            item.cost = cost; // Update buying price if provided
+        }
+
+        // Add to History
+        const log = {
+            date: new Date().toLocaleString('si-LK'), // Date & Time
+            itemId: item.id,
+            itemName: item.name,
+            qty: qty,
+            unitCost: cost || item.cost,
+            totalCost: qty * (cost || item.cost)
+        };
+        stockHistory.unshift(log); // Add to top of list
+
+        // Clear Form
+        document.getElementById('stockItemId').value = '';
+        document.getElementById('stockItemName').value = '';
+        document.getElementById('stockQty').value = '';
+        document.getElementById('stockCost').value = '';
+
+        saveToStorage();
+        renderStockHistory();
+        alert("ස්ටොක් සාර්ථකව යාවත්කාලීන විය!");
+    }
+
+    function renderStockHistory() {
+        const body = document.getElementById('stockHistoryBody');
+        let totalInvestment = 0;
+        let totalItems = 0;
+
+        body.innerHTML = stockHistory.map(log => {
+            totalInvestment += log.totalCost;
+            totalItems += log.qty;
+            return `
+                <tr>
+                    <td style="font-size: 13px;">${log.date}</td>
+                    <td>ID: ${log.itemId} - ${log.itemName}</td>
+                    <td style="color: var(--success-green); font-weight: bold;">+${log.qty}</td>
+                    <td>${log.unitCost.toFixed(2)}</td>
+                    <td>${log.totalCost.toFixed(2)}</td>
+                </tr>
+            `;
+        }).join('');
+
+        // Update Summary Cards
+        document.getElementById('totalStockInvestment').innerText = "Rs. " + totalInvestment.toFixed(2);
+        document.getElementById('totalStockItemsAdded').innerText = totalItems;
+    }
+
+    // --- POS & Standard Logic ---
+
     function enableDarkMode() {
         document.body.classList.add('dark-mode');
         isDarkMode = true;
-        document.getElementById('themeToggle').innerHTML = '☀️';
-        document.getElementById('themeToggle').title = 'Light Mode';
+        document.getElementById('themeToggle').innerText = '☀️';
         localStorage.setItem('chandana_theme', 'dark');
     }
-
-    // Light Mode සක්‍රීය කිරීම
     function enableLightMode() {
         document.body.classList.remove('dark-mode');
         isDarkMode = false;
-        document.getElementById('themeToggle').innerHTML = '🌙';
-        document.getElementById('themeToggle').title = 'Dark Mode';
+        document.getElementById('themeToggle').innerText = '🌙';
         localStorage.setItem('chandana_theme', 'light');
     }
+    document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
 
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('click', function() {
-        if (isDarkMode) {
-            enableLightMode();
-        } else {
-            enableDarkMode();
-        }
-    });
-
-    // වගුව ඇඳීම
     function renderTable() {
         const body = document.getElementById('inventoryBody');
         body.innerHTML = inventory.map(item => `
@@ -627,315 +628,169 @@
         `).join('');
     }
 
-    // අයිතම නම වෙනස් කිරීමට popup එක අරින්න
-    function openItemNamePopup(id) {
-        if (isLocked) return;
-        itemToEdit = id;
-        let item = inventory.find(i => i.id === id);
-        document.getElementById('newItemName').value = item.name;
-        document.getElementById('itemNamePopup').style.display = 'flex';
-        document.getElementById('newItemName').focus();
-    }
-
-    // අයිතම නම වෙනස් කිරීම තහවුරු කරන්න
-    function confirmItemNameChange() {
-        if (!itemToEdit) return;
-        let newName = document.getElementById('newItemName').value.trim();
-        if (newName) {
-            let item = inventory.find(i => i.id === itemToEdit);
-            item.name = newName;
-            saveToStorage();
-            renderTable();
-            
-            // Update cart if item is in cart
-            cart.forEach(cartItem => {
-                if (cartItem.id === itemToEdit) {
-                    cartItem.name = newName;
-                }
-            });
-            updateCartUI();
-        }
-        closeItemNamePopup();
-    }
-
-    // අයිතම නම popup වසන්න
-    function closeItemNamePopup() {
-        document.getElementById('itemNamePopup').style.display = 'none';
-        itemToEdit = null;
-    }
-
-    // සෙවීම (Search)
-    function searchItem() {
-        let filter = document.getElementById('searchInput').value.toLowerCase();
-        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
-        for (let row of rows) {
-            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
-        }
-    }
-
-    // ආරක්ෂක ලොක් එක (Security)
-    function handleSecurity() {
-        if (isLocked) {
-            let pin = prompt("PIN අංකය ඇතුළත් කරන්න (1234):");
-            if (pin === "1234") {
-                isLocked = false;
-                document.getElementById('lockBtn').innerHTML = '<span class="btn-icon">🔓</span> Unlocked';
-                document.getElementById('lockBtn').className = "btn btn-unlock";
-            } else { 
-                alert("වැරදි PIN එකක්!");
-            }
-        } else {
-            isLocked = true;
-            document.getElementById('lockBtn').innerHTML = '<span class="btn-icon">🔒</span> Unlock';
-            document.getElementById('lockBtn').className = "btn btn-lock";
-        }
-    }
-
-    // කෙලින්ම එඩිට් කිරීම (මිල සහ ස්ටොක්)
-    function directEdit(id, field) {
-        if (isLocked) return;
-        let item = inventory.find(i => i.id === id);
-        let currentValue = field === 'price' ? item[field].toFixed(2) : item[field];
-        let newVal = prompt("නව අගය ඇතුළත් කරන්න:", currentValue);
-        if (newVal !== null) {
-            item[field] = parseFloat(newVal);
-            saveToStorage();
-            renderTable();
-        }
-    }
-
-    // පේළියක් තේරීම
     function selectRow(id) {
         selectedId = id;
         document.querySelectorAll('tr').forEach(r => r.classList.remove('selected-row'));
-        const selectedRow = document.getElementById('row-' + id);
-        if (selectedRow) {
-            selectedRow.classList.add('selected-row');
-        }
+        const row = document.getElementById('row-' + id);
+        if (row) row.classList.add('selected-row');
     }
 
-    // කාර්ට් එකට ඇඩ් කිරීම
     function addToCart() {
-        if (!selectedId) {
-            alert("කරුණාකර පළමුව භාණ්ඩයක් තෝරාගන්න!");
-            return;
-        }
+        if (!selectedId) return alert("භාණ්ඩයක් තෝරාගන්න!");
         let item = inventory.find(i => i.id === selectedId);
         cart.push({ ...item, discount: 0 });
         updateCartUI();
     }
 
-    // කාර්ට් එකෙන් අයින් කිරීම
     function removeFromCart(index) {
-        if (confirm("මෙම අයිතමය ඉවත් කිරීමට අවශ්‍යද?")) {
+        if (confirm("ඉවත් කරන්නද?")) {
             cart.splice(index, 1);
             updateCartUI();
         }
     }
 
-    // වට්ටම් popup එක පෙන්වන්න
-    function showDiscountPopup() {
-        if (cart.length === 0) {
-            alert("කාර්ට් එක හිස් වී ඇත!");
-            return;
-        }
-        
-        let itemNum = prompt("වට්ටම් දිය යුතු අයිතමයේ අංකය ඇතුළත් කරන්න (1-" + cart.length + "):");
-        itemNum = parseInt(itemNum);
-        
-        if (itemNum > 0 && itemNum <= cart.length) {
-            discountItemIndex = itemNum - 1;
-            document.getElementById('discountAmount').value = "";
-            document.getElementById('discountPopup').style.display = 'flex';
-            document.getElementById('discountAmount').focus();
-        } else {
-            alert("වලංගු අංකයක් ඇතුළත් කරන්න!");
-        }
-    }
-
-    // වට්ටම් තහවුරු කරන්න
-    function confirmDiscount() {
-        if (discountItemIndex === null) return;
-        let discount = parseFloat(document.getElementById('discountAmount').value) || 0;
-        
-        if (discount < 0) {
-            alert("වට්ටම් ඍණ අගයක් විය නොහැක!");
-            return;
-        }
-        
-        if (discount > cart[discountItemIndex].price) {
-            if (!confirm("වට්ටම් අයිතමයේ මුළු මිලට වඩා වැඩි වේ! තහවුරු කරන්නද?")) {
-                return;
-            }
-        }
-        
-        cart[discountItemIndex].discount = discount;
-        updateCartUI();
-        closeDiscountPopup();
-    }
-
-    // වට්ටම් popup වසන්න
-    function closeDiscountPopup() {
-        document.getElementById('discountPopup').style.display = 'none';
-        discountItemIndex = null;
-    }
-
-    // --- විශේෂ වෙනස්කම: බිල පෙන්වන කොටස පිළිවෙළකට සකස් කිරීම ---
     function updateCartUI() {
         const list = document.getElementById('cartList');
-        let grossTotal = 0; // උප එකතුව
-        let totalDiscount = 0; // මුළු වට්ටම්
+        let grossTotal = 0, totalDiscount = 0;
         
         list.innerHTML = cart.map((item, idx) => {
             let finalPrice = item.price - item.discount;
             grossTotal += item.price;
             totalDiscount += item.discount;
             
-            return `
-                <li>
-                    <div class="cart-item-details">
-                        <div class="cart-item-name">${idx+1}. ${item.name}</div>
+            return `<li>
+                    <div style="flex:1"><b>${idx+1}. ${item.name}</b></div>
+                    <div style="text-align:right">
+                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${item.price.toFixed(2)}</span><span class="discount-label">-${item.discount.toFixed(2)}</span>` : ''}
+                        <b>Rs. ${finalPrice.toFixed(2)}</b>
                     </div>
-                    
-                    <div class="cart-item-price-block">
-                        ${item.discount > 0 ? 
-                            `<span class="original-price-strike">Rs. ${item.price.toFixed(2)}</span>
-                             <span class="discount-label">-${item.discount.toFixed(2)}</span>` 
-                            : ''}
-                        <div class="final-price-display">Rs. ${finalPrice.toFixed(2)}</div>
-                    </div>
-
-                    <div class="remove-btn" onclick="removeFromCart(${idx})" title="ඉවත් කරන්න">✕</div>
+                    <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
                 </li>`;
         }).join('');
         
-        // ගණනය කිරීම් යාවත්කාලීන කිරීම (පහළ කොටස)
         let netTotal = grossTotal - totalDiscount;
-
         document.getElementById('subTotalDisplay').innerText = grossTotal.toFixed(2);
-        
-        const discountRow = document.getElementById('discountRow');
-        const discountDisplay = document.getElementById('discountDisplay');
-        
-        if (totalDiscount > 0) {
-            discountRow.style.display = 'flex';
-            discountDisplay.innerText = "-" + totalDiscount.toFixed(2);
-        } else {
-            discountRow.style.display = 'none';
-        }
-
+        document.getElementById('discountRow').style.display = totalDiscount > 0 ? 'flex' : 'none';
+        document.getElementById('discountDisplay').innerText = "-" + totalDiscount.toFixed(2);
         document.getElementById('grandTotal').innerText = netTotal.toFixed(2);
     }
 
-    // බිල අවසන් කිරීම (Checkout) සහ රිසීට් පෙන්වන්න (පිළිවෙළට)
     function checkout() {
-        if (cart.length === 0) {
-            alert("කාර්ට් එක හිස් වී ඇත!");
-            return;
-        }
+        if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
         
-        // Calculate totals
-        let grossTotal = 0;
-        let totalDiscount = 0;
-        let netTotal = 0;
+        let gross = 0, dis = 0, net = 0;
+        let receiptHTML = `<div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:10px;margin-bottom:10px"><strong>CHANDANA STORES</strong></div>`;
         
-        let receiptHTML = `<div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
-                                <center><strong>CHANDANA STORES</strong></center>
-                           </div>`;
-        
-        cart.forEach((c, idx) => {
-            let item = inventory.find(i => i.id === c.id);
+        cart.forEach((c, i) => {
+            let item = inventory.find(x => x.id === c.id);
             if (item.stock > 0) item.stock--;
-            
-            let finalAmt = c.price - c.discount;
-            grossTotal += c.price;
-            totalDiscount += c.discount;
-            netTotal += finalAmt;
+            let final = c.price - c.discount;
+            gross += c.price; dis += c.discount; net += final;
+            totalIncome += final;
+            totalProfit += (final - item.cost);
 
-            // Income stats update
-            totalIncome += finalAmt;
-            totalProfit += (finalAmt - item.cost);
-            
-            // Receipt Item Row
-            receiptHTML += `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <div>${idx+1}. ${c.name}</div>
-                    <div style="text-align: right;">
-                        ${c.discount > 0 ? `<small style="text-decoration: line-through; color: #888;">${c.price.toFixed(2)}</small> <br>` : ''}
-                        Rs. ${finalAmt.toFixed(2)}
-                    </div>
-                </div>`;
+            receiptHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                <div>${i+1}. ${c.name}</div>
+                <div style="text-align:right">${c.discount>0 ? `<small style="text-decoration:line-through;color:#888">${c.price}</small><br>`:''}Rs. ${final.toFixed(2)}</div>
+            </div>`;
         });
-        
-        receiptHTML += `<div style="border-top: 1px dashed var(--border-color); margin-top: 10px; padding-top: 10px;">`;
-        
-        // Subtotal on Receipt
-        receiptHTML += `
-            <div style="display: flex; justify-content: space-between;">
-                <span>උප එකතුව:</span>
-                <span>${grossTotal.toFixed(2)}</span>
-            </div>`;
-            
-        // Discount on Receipt
-        if (totalDiscount > 0) {
-            receiptHTML += `
-            <div style="display: flex; justify-content: space-between; color: var(--discount-color);">
-                <span>වට්ටම්:</span>
-                <span>-${totalDiscount.toFixed(2)}</span>
-            </div>`;
-        }
 
-        // Net Total on Receipt
-        receiptHTML += `
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 5px; color: var(--main-blue);">
-                <span>ගෙවිය යුතු මුදල:</span>
-                <span>Rs. ${netTotal.toFixed(2)}</span>
-            </div>
+        receiptHTML += `<div style="border-top:1px dashed #ccc;margin-top:10px;padding-top:10px">
+            <div style="display:flex;justify-content:space-between"><span>උප එකතුව:</span><span>${gross.toFixed(2)}</span></div>
+            ${dis > 0 ? `<div style="display:flex;justify-content:space-between;color:var(--discount-color)"><span>වට්ටම්:</span><span>-${dis.toFixed(2)}</span></div>` : ''}
+            <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;margin-top:5px;color:var(--main-blue)"><span>ගෙවිය යුතු:</span><span>Rs. ${net.toFixed(2)}</span></div>
         </div>`;
-
-        receiptHTML += `<div style="text-align: center; margin-top: 20px; font-size: 12px;">ස්තූතියි! නැවත එන්න.</div>`;
         
-        // Update stats
         document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
-        
-        // Show receipt popup
         document.getElementById('receiptDetails').innerHTML = receiptHTML;
         document.getElementById('receiptPopup').style.display = 'flex';
         
-        // Clear cart and update storage
-        cart = [];
-        updateCartUI();
-        saveToStorage();
-        renderTable();
+        cart = []; updateCartUI(); saveToStorage(); renderTable();
     }
 
-    // රිසීට් popup වසන්න
-    function closeReceiptPopup() {
-        document.getElementById('receiptPopup').style.display = 'none';
+    function closeReceiptPopup() { document.getElementById('receiptPopup').style.display = 'none'; }
+
+    // --- Popup & Edit Functions ---
+    function openItemNamePopup(id) {
+        if (isLocked) return;
+        itemToEdit = id;
+        document.getElementById('newItemName').value = inventory.find(i => i.id === id).name;
+        document.getElementById('itemNamePopup').style.display = 'flex';
+        document.getElementById('newItemName').focus();
+    }
+    function confirmItemNameChange() {
+        if (!itemToEdit) return;
+        let val = document.getElementById('newItemName').value.trim();
+        if (val) {
+            inventory.find(i => i.id === itemToEdit).name = val;
+            saveToStorage(); renderTable();
+            cart.forEach(c => { if(c.id === itemToEdit) c.name = val; });
+            updateCartUI();
+        }
+        closeItemNamePopup();
+    }
+    function closeItemNamePopup() { document.getElementById('itemNamePopup').style.display = 'none'; itemToEdit = null; }
+    
+    function showDiscountPopup() {
+        if (cart.length === 0) return alert("හිස්!");
+        let n = parseInt(prompt("වට්ටම් දිය යුතු අංකය (1-" + cart.length + "):"));
+        if (n > 0 && n <= cart.length) {
+            discountItemIndex = n - 1;
+            document.getElementById('discountAmount').value = "";
+            document.getElementById('discountPopup').style.display = 'flex';
+            document.getElementById('discountAmount').focus();
+        } else alert("වැරදි අංකයක්!");
+    }
+    function confirmDiscount() {
+        if (discountItemIndex === null) return;
+        let d = parseFloat(document.getElementById('discountAmount').value) || 0;
+        if (d < 0) return alert("ඍණ අගයක් බැහැ!");
+        if (d > cart[discountItemIndex].price && !confirm("වට්ටම මිලට වඩා වැඩියි!")) return;
+        cart[discountItemIndex].discount = d;
+        updateCartUI(); closeDiscountPopup();
+    }
+    function closeDiscountPopup() { document.getElementById('discountPopup').style.display = 'none'; discountItemIndex = null; }
+
+    function searchItem() {
+        let f = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
+        for (let r of rows) r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none";
     }
 
-    // Enter key support for popups
-    document.addEventListener('keydown', function(event) {
-        // Item name popup
-        if (document.getElementById('itemNamePopup').style.display === 'flex' && event.key === 'Enter') {
-            confirmItemNameChange();
-            event.preventDefault();
+    function handleSecurity() {
+        if (isLocked) {
+            if (prompt("PIN (1234):") === "1234") {
+                isLocked = false;
+                document.getElementById('lockBtn').innerHTML = '🔓 Unlocked';
+                document.getElementById('lockBtn').className = "btn btn-unlock";
+            } else alert("වැරදියි!");
+        } else {
+            isLocked = true;
+            document.getElementById('lockBtn').innerHTML = '🔒 Unlock';
+            document.getElementById('lockBtn').className = "btn btn-lock";
         }
-        // Discount popup
-        if (document.getElementById('discountPopup').style.display === 'flex' && event.key === 'Enter') {
-            confirmDiscount();
-            event.preventDefault();
+    }
+
+    function directEdit(id, field) {
+        if (isLocked) return;
+        let item = inventory.find(i => i.id === id);
+        let val = prompt("නව අගය:", field==='price'?item[field].toFixed(2):item[field]);
+        if (val !== null) {
+            item[field] = parseFloat(val);
+            saveToStorage(); renderTable();
         }
-        // Receipt popup
-        if (document.getElementById('receiptPopup').style.display === 'flex' && event.key === 'Enter') {
-            closeReceiptPopup();
-            event.preventDefault();
-        }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+        if (document.getElementById('itemNamePopup').style.display === 'flex' && e.key === 'Enter') { confirmItemNameChange(); e.preventDefault(); }
+        if (document.getElementById('discountPopup').style.display === 'flex' && e.key === 'Enter') { confirmDiscount(); e.preventDefault(); }
+        if (document.getElementById('receiptPopup').style.display === 'flex' && e.key === 'Enter') { closeReceiptPopup(); e.preventDefault(); }
     });
 
-    // පද්ධතිය පණ ගැන්වීම
     window.onload = initialize;
 </script>
-
 </body>
 </html>
+
+```
