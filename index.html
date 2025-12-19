@@ -689,7 +689,7 @@
             </div>
         </div>
 
-        <h3 style="margin-bottom: 10px;">සොයාගත් රිසිට්</h3>
+        <h3 style="margin-bottom: 10px;">මෑත ගනුදෙනු</h3>
         <div class="scroll-box">
             <div id="receiptsResults" style="padding: 10px;"></div>
         </div>
@@ -1279,6 +1279,50 @@
                 </div>
             </div>
         `).join('');
+        
+        // Also load all receipts in the main section (not just search results)
+        displayAllRecentReceipts();
+    }
+    
+    function displayAllRecentReceipts() {
+        const resultsDiv = document.getElementById('receiptsResults');
+        const allReceipts = salesHistory.slice(0, 50); // Show last 50 receipts
+        
+        if (allReceipts.length === 0) {
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts yet. Make your first sale!</p>';
+            return;
+        }
+        
+        resultsDiv.innerHTML = allReceipts.map(receipt => `
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <div class="receipt-id">Receipt #${receipt.receiptId}</div>
+                    <div class="receipt-date">${receipt.date}</div>
+                </div>
+                
+                <div class="receipt-items">
+                    ${receipt.items.slice(0, 3).map((item, index) => `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+                            <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
+                            <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                    ${receipt.items.length > 3 ? `<div style="font-size:12px; color:#666; text-align:center;">... +${receipt.items.length - 3} more items</div>` : ''}
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
+                    <div>
+                        <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                        ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                    </div>
+                    <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                </div>
+                
+                <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
+                    <span class="btn-icon">🖨️</span> Print Again
+                </button>
+            </div>
+        `).join('');
     }
 
     function updateReceiptStats() {
@@ -1334,46 +1378,58 @@
             });
         }
         
-        displayReceiptsResults(filteredReceipts);
+        displaySearchResults(filteredReceipts);
     }
-
-    function displayReceiptsResults(receipts) {
+    
+    function displaySearchResults(receipts) {
         const resultsDiv = document.getElementById('receiptsResults');
         
         if (receipts.length === 0) {
-            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts found</p>';
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts found matching your search criteria.</p>';
             return;
         }
         
-        resultsDiv.innerHTML = receipts.map(receipt => `
-            <div class="receipt-card">
-                <div class="receipt-header">
-                    <div class="receipt-id">Receipt #${receipt.receiptId}</div>
-                    <div class="receipt-date">${receipt.date}</div>
-                </div>
-                
-                <div class="receipt-items">
-                    ${receipt.items.map((item, index) => `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
-                            <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
-                            <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
-                    <div>
-                        <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
-                        ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+        resultsDiv.innerHTML = `
+            <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: bold; color: var(--main-blue);">
+                        Search Results: ${receipts.length} receipts found
                     </div>
-                    <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                    <button class="btn" style="background: #607d8b; color: white; padding: 5px 10px; font-size: 12px;" onclick="displayAllRecentReceipts()">
+                        Show All Receipts
+                    </button>
                 </div>
-                
-                <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
-                    <span class="btn-icon">🖨️</span> Print Again
-                </button>
             </div>
-        `).join('');
+            ${receipts.map(receipt => `
+                <div class="receipt-card">
+                    <div class="receipt-header">
+                        <div class="receipt-id">Receipt #${receipt.receiptId}</div>
+                        <div class="receipt-date">${receipt.date}</div>
+                    </div>
+                    
+                    <div class="receipt-items">
+                        ${receipt.items.map((item, index) => `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+                                <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
+                                <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
+                        <div>
+                            <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                            ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                        </div>
+                        <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                    </div>
+                    
+                    <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
+                        <span class="btn-icon">🖨️</span> Print Again
+                    </button>
+                </div>
+            `).join('')}
+        `;
     }
 
     function viewReceiptDetails(receiptId) {
