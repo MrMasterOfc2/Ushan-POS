@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="si">
 <head>
@@ -461,16 +460,12 @@
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
         /* =========================
-           🔥 PRINT FIX (CRITICAL)
+           🔥 PRINT FIX (PROFESSIONAL RECEIPT)
            ========================= */
         
-        /* PRINTABLE RECEIPT - FIXED */
+        /* PRINTABLE RECEIPT - FIXED FOR FULL PAGE */
         #printableReceipt {
-            display: block;          /* was display:none */
-            visibility: hidden;      /* screen එකට නොපේන්න */
-            position: absolute;
-            left: -9999px;           /* screen එකෙන් පිටතට */
-            top: -9999px;
+            display: none; /* Normal අවස්ථාවේ නොපෙන්වන්න */
         }
 
         .receipt-preview {
@@ -481,32 +476,121 @@
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        /* PRINT ONLY */
+        /* PROFESSIONAL RECEIPT STYLES FOR PRINTING */
+        .receipt-print {
+            width: 80mm !important;
+            max-width: 80mm !important;
+            margin: 0 auto !important;
+            padding: 10px !important;
+            background: white !important;
+            color: black !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            font-size: 13px !important;
+            line-height: 1.3 !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+        
+        .receipt-header-print {
+            text-align: center !important;
+            border-bottom: 2px dashed #000 !important;
+            padding-bottom: 10px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .receipt-store-name {
+            font-size: 18px !important;
+            font-weight: bold !important;
+            margin-bottom: 5px !important;
+            text-transform: uppercase !important;
+        }
+        
+        .receipt-address {
+            font-size: 11px !important;
+            margin-bottom: 5px !important;
+        }
+        
+        .receipt-item-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            margin-bottom: 3px !important;
+            padding-bottom: 3px !important;
+            border-bottom: 1px dotted #ccc !important;
+        }
+        
+        .receipt-item-name {
+            flex: 1 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+        
+        .receipt-item-price {
+            text-align: right !important;
+            min-width: 50px !important;
+        }
+        
+        .receipt-total-row {
+            font-weight: bold !important;
+            font-size: 14px !important;
+            margin-top: 10px !important;
+            padding-top: 10px !important;
+            border-top: 2px solid #000 !important;
+        }
+        
+        .receipt-footer {
+            text-align: center !important;
+            margin-top: 15px !important;
+            font-size: 11px !important;
+            padding-top: 10px !important;
+            border-top: 1px dashed #000 !important;
+        }
+
+        /* PRINT ONLY - FULL PAGE වෙන්න */
         @media print {
             body * {
                 visibility: hidden !important;
+                display: none !important;
             }
-
-            #printableReceipt,
-            #printableReceipt * {
-                visibility: visible !important;
+            
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
             }
 
             #printableReceipt {
+                display: block !important;
+                visibility: visible !important;
                 position: fixed !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 80mm;
-                padding: 10px;
+                width: 100% !important;
+                height: 100% !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 background: white !important;
                 color: black !important;
                 font-family: 'Courier New', Courier, monospace !important;
-                font-size: 13px;
+                font-size: 14px !important;
+                line-height: 1.3 !important;
+                z-index: 999999 !important;
                 box-shadow: none !important;
                 border: none !important;
+                overflow: visible !important;
+            }
+            
+            /* For 80mm paper */
+            .receipt-container {
+                width: 80mm !important;
+                max-width: 80mm !important;
+                margin: 0 auto !important;
+                padding: 10px !important;
+                box-sizing: border-box !important;
             }
 
             header, .nav-tabs, .view-section, .popup-overlay, .btn, .tab-btn {
@@ -729,8 +813,9 @@
                     <select id="paperSizeSelect" onchange="saveSettings()">
                         <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
                         <option value="58mm">58mm (Small Thermal Printer)</option>
+                        <option value="A4">A4 (Normal Printer - Full Page)</option>
                     </select>
-                    <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
+                    <small style="color: #666;">මෙය ඔබගේ Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
                 </div>
                 <button class="btn btn-print" onclick="testPrint()">
                     <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
@@ -1173,7 +1258,7 @@
     }
 
     /* =========================
-       🔥 PRINT FIX - CHECKOUT FUNCTION
+       🔥 PROFESSIONAL RECEIPT CHECKOUT FUNCTION
        ========================= */
     function checkout() {
         if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
@@ -1193,16 +1278,25 @@
             paymentMethod: "Cash"
         };
         
-        // 🔥 FIXED: Build receipt HTML for popup preview AND printable receipt
+        // 🔥 PROFESSIONAL RECEIPT HTML TEMPLATE
         let receiptHTML = `
-            <div style="text-align:center; margin-bottom:10px;">
-                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
-                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receiptId}</div>
-                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
-                <div style="font-size:12px; margin-bottom:10px;">${date}</div>
-            </div>
-            <hr style="border-top: 1px dashed black; margin:5px 0;">
-            <div style="margin-bottom:10px;">
+            <div class="receipt-container receipt-print">
+                <div class="receipt-header-print">
+                    <div class="receipt-store-name">CHANDANA STORES</div>
+                    <div class="receipt-address">123 Main Street, Colombo</div>
+                    <div class="receipt-address">Tel: 011-1234567 | Email: info@chandanastores.lk</div>
+                    <div style="font-size: 11px; margin-top: 5px;">--------------------------------</div>
+                    <div style="font-size: 11px;">Receipt ID: ${receiptId}</div>
+                    <div style="font-size: 11px;">${date}</div>
+                    <div style="font-size: 11px; margin-top: 5px;">--------------------------------</div>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; padding-bottom: 5px; border-bottom: 1px solid #000;">
+                        <div style="width: 60%;">Item</div>
+                        <div style="width: 20%; text-align: center;">Qty</div>
+                        <div style="width: 20%; text-align: right;">Price</div>
+                    </div>
         `;
         
         cart.forEach((c, i) => {
@@ -1218,22 +1312,119 @@
             }
             
             let quantity = c.quantity || 1;
-            let final = (c.price - c.discount) * quantity;
+            let itemTotal = (c.price - c.discount) * quantity;
+            let finalPrice = itemTotal;
             gross += c.price * quantity; 
             dis += c.discount * quantity; 
-            net += final;
-            totalIncome += final;
+            net += finalPrice;
+            totalIncome += finalPrice;
             
-            if(item) totalProfit += (final - (item.cost * quantity));
+            if(item) totalProfit += (finalPrice - (item.cost * quantity));
 
+            // Item name formatting (truncate if too long)
+            let itemName = c.name;
+            if (itemName.length > 20) {
+                itemName = itemName.substring(0, 17) + '...';
+            }
+            
             receiptHTML += `
+                <div class="receipt-item-row">
+                    <div class="receipt-item-name">${i+1}. ${itemName}</div>
+                    <div style="width: 20%; text-align: center;">${quantity}</div>
+                    <div class="receipt-item-price">${finalPrice.toFixed(2)}</div>
+                </div>`;
+            
+            // Show discount if applied
+            if (c.discount > 0) {
+                receiptHTML += `
+                <div class="receipt-item-row" style="color: red; font-size: 11px;">
+                    <div class="receipt-item-name">   - Discount</div>
+                    <div style="width: 20%; text-align: center;">${quantity}</div>
+                    <div class="receipt-item-price">-${(c.discount * quantity).toFixed(2)}</div>
+                </div>`;
+            }
+        });
+
+        receiptHTML += `
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc;">
+                        <div>Subtotal:</div>
+                        <div>Rs. ${gross.toFixed(2)}</div>
+                    </div>
+        `;
+        
+        if (dis > 0) {
+            receiptHTML += `
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc; color: red;">
+                        <div>Discount:</div>
+                        <div>-Rs. ${dis.toFixed(2)}</div>
+                    </div>`;
+        }
+        
+        // Calculate tax (assuming 8% VAT)
+        let tax = net * 0.08;
+        let finalTotal = net + tax;
+        
+        receiptHTML += `
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc;">
+                        <div>VAT (8%):</div>
+                        <div>Rs. ${tax.toFixed(2)}</div>
+                    </div>
+                    
+                    <div class="receipt-total-row" style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid #000;">
+                        <div><strong>TOTAL:</strong></div>
+                        <div><strong>Rs. ${finalTotal.toFixed(2)}</strong></div>
+                    </div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div>Payment Method: CASH</div>
+                    <div style="margin: 5px 0;">*** THANK YOU FOR SHOPPING WITH US ***</div>
+                    <div>Have a nice day! Come again!</div>
+                    <div style="margin-top: 10px; font-size: 10px;">
+                        For Returns: Keep this receipt and original packaging<br>
+                        within 7 days of purchase
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Update receipt object with final totals
+        receipt.grossTotal = gross;
+        receipt.discountTotal = dis;
+        receipt.netTotal = finalTotal;
+        receipt.tax = tax;
+        
+        // Add to sales history
+        salesHistory.unshift(receipt);
+        
+        // Update stats display
+        updateStatsDisplay();
+        
+        // 🔥 Show receipt in popup (simple preview)
+        let simplePreview = `
+            <div style="text-align:center; margin-bottom:10px;">
+                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receiptId}</div>
+                <div style="font-size:12px; margin-bottom:5px;">${date}</div>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="margin-bottom:10px;">
+        `;
+        
+        cart.forEach((c, i) => {
+            let quantity = c.quantity || 1;
+            let final = (c.price - c.discount) * quantity;
+            simplePreview += `
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
                     <div>${c.name}${quantity > 1 ? ' x' + quantity : ''}</div>
                     <div>Rs. ${final.toFixed(2)}</div>
                 </div>`;
         });
 
-        receiptHTML += `
+        simplePreview += `
             </div>
             <hr style="border-top: 1px dashed black; margin:5px 0;">
             <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
@@ -1243,17 +1434,21 @@
         `;
         
         if (dis > 0) {
-            receiptHTML += `
+            simplePreview += `
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
                     <span>Discount:</span>
                     <span>-Rs. ${dis.toFixed(2)}</span>
                 </div>`;
         }
         
-        receiptHTML += `
+        simplePreview += `
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                <span>VAT (8%):</span>
+                <span>Rs. ${tax.toFixed(2)}</span>
+            </div>
             <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
                 <span>TOTAL:</span>
-                <span>Rs. ${net.toFixed(2)}</span>
+                <span>Rs. ${finalTotal.toFixed(2)}</span>
             </div>
             <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
             <div style="text-align:center; font-size:11px; color:#666;">
@@ -1261,22 +1456,10 @@
             </div>
         `;
         
-        // Update receipt object with final totals
-        receipt.grossTotal = gross;
-        receipt.discountTotal = dis;
-        receipt.netTotal = net;
-        
-        // Add to sales history
-        salesHistory.unshift(receipt);
-        
-        // Update stats display
-        updateStatsDisplay();
-        
-        // 🔥 FIXED: Show receipt in popup
-        document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
+        document.getElementById('receiptPreviewBox').innerHTML = simplePreview;
         document.getElementById('receiptPopup').style.display = 'flex';
         
-        // 🔥 FIXED: Store receipt HTML for printing - This is the CRITICAL fix!
+        // 🔥 Store PROFESSIONAL receipt HTML for printing
         document.getElementById('printableReceipt').innerHTML = receiptHTML;
         
         // Clear cart and update UI
@@ -1347,6 +1530,7 @@
                     <div>
                         <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
                         ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                        <div style="font-size:12px; color:#666;">VAT: Rs. ${receipt.tax ? receipt.tax.toFixed(2) : '0.00'}</div>
                     </div>
                     <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
                 </div>
@@ -1438,6 +1622,7 @@
                         <div>
                             <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
                             ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                            <div style="font-size:12px; color:#666;">VAT: Rs. ${receipt.tax ? receipt.tax.toFixed(2) : '0.00'}</div>
                         </div>
                         <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
                     </div>
@@ -1460,54 +1645,80 @@
             return;
         }
         
-        // Build receipt HTML for viewing
+        // Build professional receipt HTML for viewing
         let receiptHTML = `
-            <div style="text-align:center; margin-bottom:10px;">
-                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
-                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receipt.receiptId}</div>
-                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
-                <div style="font-size:12px; margin-bottom:10px;">${receipt.date}</div>
-            </div>
-            <hr style="border-top: 1px dashed black; margin:5px 0;">
-            <div style="margin-bottom:10px;">
+            <div class="receipt-container receipt-print" style="border: 1px solid #ddd; padding: 15px; margin: 10px 0;">
+                <div class="receipt-header-print">
+                    <div class="receipt-store-name">CHANDANA STORES</div>
+                    <div class="receipt-address">123 Main Street, Colombo</div>
+                    <div class="receipt-address">Tel: 011-1234567</div>
+                    <div style="font-size: 11px; margin-top: 5px;">--------------------------------</div>
+                    <div style="font-size: 11px;">Receipt ID: ${receipt.receiptId}</div>
+                    <div style="font-size: 11px;">${receipt.date}</div>
+                    <div style="font-size: 11px; margin-top: 5px;">--------------------------------</div>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; padding-bottom: 5px; border-bottom: 1px solid #000;">
+                        <div style="width: 60%;">Item</div>
+                        <div style="width: 20%; text-align: center;">Qty</div>
+                        <div style="width: 20%; text-align: right;">Price</div>
+                    </div>
         `;
         
         receipt.items.forEach((item, i) => {
             let quantity = item.quantity || 1;
             let final = (item.price - item.discount) * quantity;
             
+            // Item name formatting
+            let itemName = item.name;
+            if (itemName.length > 20) {
+                itemName = itemName.substring(0, 17) + '...';
+            }
+            
             receiptHTML += `
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
-                    <div>${item.name}${quantity > 1 ? ' x' + quantity : ''}</div>
-                    <div>Rs. ${final.toFixed(2)}</div>
+                <div class="receipt-item-row">
+                    <div class="receipt-item-name">${i+1}. ${itemName}</div>
+                    <div style="width: 20%; text-align: center;">${quantity}</div>
+                    <div class="receipt-item-price">${final.toFixed(2)}</div>
                 </div>`;
         });
 
         receiptHTML += `
-            </div>
-            <hr style="border-top: 1px dashed black; margin:5px 0;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
-                <span>Subtotal:</span>
-                <span>Rs. ${receipt.grossTotal.toFixed(2)}</span>
-            </div>
+                </div>
+                
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc;">
+                        <div>Subtotal:</div>
+                        <div>Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                    </div>
         `;
         
         if (receipt.discountTotal > 0) {
             receiptHTML += `
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
-                    <span>Discount:</span>
-                    <span>-Rs. ${receipt.discountTotal.toFixed(2)}</span>
-                </div>`;
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc; color: red;">
+                        <div>Discount:</div>
+                        <div>-Rs. ${receipt.discountTotal.toFixed(2)}</div>
+                    </div>`;
         }
         
         receiptHTML += `
-            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
-                <span>TOTAL:</span>
-                <span>Rs. ${receipt.netTotal.toFixed(2)}</span>
-            </div>
-            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
-            <div style="text-align:center; font-size:11px; color:#666;">
-                Thank You!<br>Come Again!
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted #ccc;">
+                        <div>VAT (8%):</div>
+                        <div>Rs. ${receipt.tax ? receipt.tax.toFixed(2) : '0.00'}</div>
+                    </div>
+                    
+                    <div class="receipt-total-row" style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid #000;">
+                        <div><strong>TOTAL:</strong></div>
+                        <div><strong>Rs. ${receipt.netTotal.toFixed(2)}</strong></div>
+                    </div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div>Payment Method: ${receipt.paymentMethod || 'CASH'}</div>
+                    <div style="margin: 5px 0;">*** THANK YOU FOR SHOPPING WITH US ***</div>
+                    <div>Have a nice day! Come again!</div>
+                </div>
             </div>
         `;
         
@@ -1526,22 +1737,51 @@
     }
 
     /* =========================
-       🔥 PRINT FUNCTIONS - FIXED
+       🔥 PRINT FUNCTIONS - FULL PAGE FIX
        ========================= */
     
     function testPrint() {
         const testContent = `
-            <div style="text-align:center; font-weight:bold; font-size:16px;">TEST PRINT</div>
-            <div style="text-align:center; font-size:14px; margin-bottom:10px;">CHANDANA STORES</div>
-            <hr style="border-top: 1px dashed black; margin:5px 0;">
-            <div style="font-size:13px; margin-bottom:3px;">Printer Connection: OK</div>
-            <div style="font-size:13px; margin-bottom:3px;">Time: ${new Date().toLocaleTimeString()}</div>
-            <div style="font-size:13px; margin-bottom:3px;">Date: ${new Date().toLocaleDateString()}</div>
-            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
-            <div style="text-align:center; font-size:12px;">Thank You!</div>
+            <div class="receipt-container receipt-print">
+                <div class="receipt-header-print">
+                    <div class="receipt-store-name">CHANDANA STORES</div>
+                    <div class="receipt-address">123 Main Street, Colombo</div>
+                    <div class="receipt-address">Tel: 011-1234567</div>
+                    <div style="font-size: 11px; margin-top: 5px;">================================</div>
+                    <div style="font-size: 14px; font-weight: bold; margin-top: 10px;">TEST PRINT</div>
+                    <div style="font-size: 11px; margin-top: 5px;">================================</div>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
+                        <div>Printer Connection:</div>
+                        <div><strong>SUCCESSFUL</strong></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
+                        <div>Date:</div>
+                        <div>${new Date().toLocaleDateString()}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
+                        <div>Time:</div>
+                        <div>${new Date().toLocaleTimeString()}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 3px 0;">
+                        <div>Paper Size:</div>
+                        <div>${paperSize}</div>
+                    </div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div style="margin: 10px 0;">*** TEST PRINT SUCCESSFUL ***</div>
+                    <div>Your printer is working correctly!</div>
+                    <div style="margin-top: 15px; font-size: 10px;">
+                        CHANDANA STORES POS SYSTEM<br>
+                        Version 2.0
+                    </div>
+                </div>
+            </div>
         `;
         document.getElementById('printableReceipt').innerHTML = testContent;
-        adjustPrintStyles();
         
         // Small delay to ensure content is rendered
         setTimeout(() => {
@@ -1551,30 +1791,42 @@
 
     function adjustPrintStyles() {
         const container = document.getElementById('printableReceipt');
-        container.style.maxWidth = '80mm';
+        
+        // Clear any previous styles
+        container.style.cssText = '';
+        
+        // Apply paper size specific styles
+        if (paperSize === '58mm') {
+            container.style.maxWidth = '58mm';
+            container.style.fontSize = '10px';
+        } else if (paperSize === '80mm') {
+            container.style.maxWidth = '80mm';
+            container.style.fontSize = '12px';
+        } else if (paperSize === 'A4') {
+            container.style.maxWidth = '210mm';
+            container.style.fontSize = '14px';
+            // Center on A4
+            container.style.margin = '20px auto';
+        }
+        
         container.style.margin = '0 auto';
         container.style.padding = '10px';
         container.style.fontFamily = "'Courier New', Courier, monospace";
-        container.style.fontSize = '13px';
         container.style.color = '#000';
         container.style.backgroundColor = '#fff';
-        
-        // Adjust for paper size
-        if (paperSize === '58mm') {
-            container.style.maxWidth = '50mm';
-            container.style.fontSize = '11px';
-        }
+        container.style.lineHeight = '1.3';
     }
 
     function printReceipt() {
         adjustPrintStyles();
-        // Small delay to ensure print dialog appears after popup is shown
+        
+        // Force print dialog to open
         setTimeout(() => {
             window.print();
-            // Close popup after print (optional)
+            // Optional: Close popup after print
             setTimeout(() => {
                 closeReceiptPopup();
-            }, 500);
+            }, 1000);
         }, 300);
     }
 
