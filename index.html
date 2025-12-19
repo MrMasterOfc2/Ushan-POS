@@ -16,6 +16,7 @@
             --bg-secondary: #f5f6fa;
             --border-color: #ddd;
             --shadow: rgba(0,0,0,0.1);
+            --discount-color: #ff5722;
         }
 
         .dark-mode {
@@ -28,6 +29,7 @@
             --bg-secondary: #1e1e1e;
             --border-color: #333;
             --shadow: rgba(255,255,255,0.1);
+            --discount-color: #ff8a65;
         }
 
         body {
@@ -92,7 +94,7 @@
             border-left: 5px solid var(--main-blue);
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 4px var(--shadow);
-            min-width: 320px;
+            min-width: 340px;
             transition: all 0.3s;
         }
 
@@ -149,12 +151,13 @@
             border-color: #3d8b40;
         }
         .btn-pay { 
-            background: var(--success-green); 
+            background: var(--main-blue); 
             color: white; 
             width: 100%; 
             padding: 15px; 
             font-size: 18px;
-            border-color: #1b5e20;
+            border-color: #0d47a1;
+            margin-top: 10px;
         }
         .btn-dark-mode {
             background: #333;
@@ -165,11 +168,6 @@
             background: #f5f5f5;
             color: #333;
             border-color: #ddd;
-        }
-        .btn-cast {
-            background: #5c6bc0;
-            color: white;
-            border-color: #3f51b5;
         }
 
         /* වගුව (Table) */
@@ -254,6 +252,7 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: all 0.3s;
+            box-sizing: border-box;
         }
 
         .popup-input:focus {
@@ -290,52 +289,11 @@
             border-color: #616161;
         }
 
-        /* Cast වින්ඩෝව */
-        .cast-devices {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 25px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 15px;
-            z-index: 100;
-            min-width: 200px;
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .cast-devices h4 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: var(--main-blue);
-        }
-
-        .device-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .device-list li {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .device-list li:hover {
-            background: var(--bg-secondary);
-        }
-
-        .device-list li:last-child {
-            border-bottom: none;
-        }
-
-        /* Cart item styling */
+        /* Cart item styling - Improved Layout */
         #cartList li {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 12px;
             border-bottom: 1px solid var(--border-color);
             transition: background 0.3s;
@@ -343,6 +301,67 @@
 
         #cartList li:hover {
             background: var(--bg-secondary);
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .cart-item-price-block {
+            text-align: right;
+            min-width: 80px;
+        }
+
+        .original-price-strike {
+            text-decoration: line-through;
+            color: #888;
+            font-size: 12px;
+            display: block;
+        }
+
+        .discount-label {
+            color: var(--discount-color);
+            font-size: 12px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .final-price-display {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        /* Bill Summary Section */
+        .bill-summary {
+            padding: 15px 0;
+            border-top: 2px dashed var(--border-color);
+            margin-top: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .summary-row.total {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--main-blue);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .summary-row.discount-row {
+            color: var(--discount-color);
         }
 
         /* Mobile එකකදී පෙනුම වෙනස් වීම */
@@ -398,14 +417,17 @@
             font-size: 16px;
         }
 
-        /* Loading animation for cast */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .remove-btn {
+            color: var(--error-red);
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: background 0.2s;
         }
-
-        .loading {
-            animation: spin 1s linear infinite;
+        .remove-btn:hover {
+            background: rgba(198, 40, 40, 0.1);
         }
     </style>
 </head>
@@ -420,9 +442,6 @@
         
         <div class="stats-display" id="stats">ආදායම: 0.00 | ලාභය: 0.00</div>
     </div>
-    
-
-
 </header>
 
 <div class="main-wrapper">
@@ -445,11 +464,10 @@
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
-                    <!-- Items will be loaded here -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
-        <button class="btn" style="background: var(--main-blue); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
+        <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
             <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න
         </button>
     </section>
@@ -464,10 +482,22 @@
             <button class="btn" style="background: #607d8b; color: white; width: 100%; margin-bottom: 5px; border-color: #546e7a;" onclick="showDiscountPopup()">
                 <span class="btn-icon">💰</span> වට්ටම් (Discount)
             </button>
-            <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: var(--error-red); padding: 10px 0; border-top: 2px solid var(--border-color);">
-                <span>එකතුව:</span>
-                <span id="grandTotal">0.00</span>
+            
+            <div id="billSummaryArea" class="bill-summary">
+                <div class="summary-row">
+                    <span>උප එකතුව (Subtotal):</span>
+                    <span id="subTotalDisplay">0.00</span>
+                </div>
+                <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                    <span>වට්ටම් (Discount):</span>
+                    <span id="discountDisplay">-0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>එකතුව (Net Total):</span>
+                    <span id="grandTotal">0.00</span>
+                </div>
             </div>
+
             <button class="btn btn-pay" onclick="checkout()">
                 <span class="btn-icon">💳</span> ගෙවීම අවසන් කරන්න (PAY)
             </button>
@@ -475,7 +505,6 @@
     </section>
 </div>
 
-<!-- Popup for changing item name -->
 <div id="itemNamePopup" class="popup-overlay">
     <div class="popup-content">
         <h3>භාණ්ඩයේ නම වෙනස් කරන්න</h3>
@@ -487,7 +516,6 @@
     </div>
 </div>
 
-<!-- Popup for discount -->
 <div id="discountPopup" class="popup-overlay">
     <div class="popup-content">
         <h3>වට්ටම් ඇතුළත් කරන්න</h3>
@@ -499,24 +527,13 @@
     </div>
 </div>
 
-<!-- Popup for checkout success message -->
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
-        <h3>ගෙවීම සාර්ථකයි! ✓</h3>
-        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; padding-right: 10px;">
-            <!-- Receipt details will be shown here -->
-        </div>
-        <div style="border-top: 2px solid var(--border-color); padding-top: 15px;">
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; color: var(--error-red);">
-                <span>මුළු එකතුව:</span>
-                <span id="receiptTotal">0.00</span>
+        <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
+        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; padding-right: 10px; font-family: 'Courier New', monospace;">
             </div>
-            <div id="receiptDiscountInfo" style="color: var(--success-green); margin-top: 10px;">
-                <!-- Discount information will be shown here -->
-            </div>
-        </div>
         <div class="popup-buttons">
-            <button class="btn-confirm" onclick="closeReceiptPopup()">හරි</button>
+            <button class="btn-confirm" onclick="closeReceiptPopup()">හරි (OK)</button>
         </div>
     </div>
 </div>
@@ -596,37 +613,6 @@
             enableDarkMode();
         }
     });
-
-    // Cast devices toggle
-    function toggleCastDevices() {
-        const castDevices = document.getElementById('castDevices');
-        if (castDevices.style.display === 'block') {
-            castDevices.style.display = 'none';
-        } else {
-            castDevices.style.display = 'block';
-        }
-    }
-
-    // Connect to cast device
-    function connectToDevice(deviceName) {
-        castConnected = true;
-        castDeviceName = deviceName;
-        document.getElementById('castDevices').style.display = 'none';
-        
-        // Update cast button
-        const castBtn = document.querySelector('.btn-cast');
-        castBtn.innerHTML = '<span class="btn-icon loading">📺</span> Connecting...';
-        
-        // Simulate connection delay
-        setTimeout(() => {
-            castBtn.innerHTML = `<span class="btn-icon">📺</span> Casting to ${deviceName}`;
-            castBtn.style.background = '#4caf50';
-            castBtn.style.borderColor = '#2e7d32';
-            
-            // Show success message
-            alert(`Successfully connected to ${deviceName}`);
-        }, 1500);
-    }
 
     // වගුව ඇඳීම
     function renderTable() {
@@ -794,53 +780,54 @@
         discountItemIndex = null;
     }
 
-    // බිල පෙන්වන කොටස අලුත් කිරීම
+    // --- විශේෂ වෙනස්කම: බිල පෙන්වන කොටස පිළිවෙළකට සකස් කිරීම ---
     function updateCartUI() {
         const list = document.getElementById('cartList');
-        let grandTotal = 0;
-        let totalDiscount = 0;
+        let grossTotal = 0; // උප එකතුව
+        let totalDiscount = 0; // මුළු වට්ටම්
         
         list.innerHTML = cart.map((item, idx) => {
             let finalPrice = item.price - item.discount;
-            grandTotal += finalPrice;
+            grossTotal += item.price;
             totalDiscount += item.discount;
             
             return `
                 <li>
-                    <div>
-                        <strong>${idx+1}. ${item.name}</strong>
-                        ${item.discount > 0 ? 
-                            `<br><small style="color: var(--success-green);">වට්ටම්: Rs. ${item.discount.toFixed(2)}</small>` 
-                            : ''}
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${idx+1}. ${item.name}</div>
                     </div>
-                    <div style="text-align: right;">
-                        <div>Rs. ${finalPrice.toFixed(2)}</div>
+                    
+                    <div class="cart-item-price-block">
                         ${item.discount > 0 ? 
-                            `<small style="color: #999; text-decoration: line-through;">Rs. ${item.price.toFixed(2)}</small>` 
+                            `<span class="original-price-strike">Rs. ${item.price.toFixed(2)}</span>
+                             <span class="discount-label">-${item.discount.toFixed(2)}</span>` 
                             : ''}
-                        <div>
-                            <b style="color: var(--error-red); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 2px 6px; border-radius: 50%; border: 1px solid var(--error-red);" 
-                               onclick="removeFromCart(${idx})" title="ඉවත් කරන්න">✕</b>
-                        </div>
+                        <div class="final-price-display">Rs. ${finalPrice.toFixed(2)}</div>
                     </div>
+
+                    <div class="remove-btn" onclick="removeFromCart(${idx})" title="ඉවත් කරන්න">✕</div>
                 </li>`;
         }).join('');
         
-        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        // ගණනය කිරීම් යාවත්කාලීන කිරීම (පහළ කොටස)
+        let netTotal = grossTotal - totalDiscount;
+
+        document.getElementById('subTotalDisplay').innerText = grossTotal.toFixed(2);
         
-        // Cast to device if connected
-        if (castConnected) {
-            updateCastDisplay();
+        const discountRow = document.getElementById('discountRow');
+        const discountDisplay = document.getElementById('discountDisplay');
+        
+        if (totalDiscount > 0) {
+            discountRow.style.display = 'flex';
+            discountDisplay.innerText = "-" + totalDiscount.toFixed(2);
+        } else {
+            discountRow.style.display = 'none';
         }
+
+        document.getElementById('grandTotal').innerText = netTotal.toFixed(2);
     }
 
-    // Update cast display
-    function updateCastDisplay() {
-        // In a real app, this would send data to the cast device
-        console.log(`Updating cast display for ${castDeviceName}`);
-    }
-
-    // බිල අවසන් කිරීම (Checkout) සහ රිසීට් පෙන්වන්න
+    // බිල අවසන් කිරීම (Checkout) සහ රිසීට් පෙන්වන්න (පිළිවෙළට)
     function checkout() {
         if (cart.length === 0) {
             alert("කාර්ට් එක හිස් වී ඇත!");
@@ -848,59 +835,72 @@
         }
         
         // Calculate totals
-        let grandTotal = 0;
+        let grossTotal = 0;
         let totalDiscount = 0;
-        let receiptHTML = "<h4>භාණ්ඩ ලැයිස්තුව:</h4>";
+        let netTotal = 0;
+        
+        let receiptHTML = `<div style="border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
+                                <center><strong>CHANDANA STORES</strong></center>
+                           </div>`;
         
         cart.forEach((c, idx) => {
             let item = inventory.find(i => i.id === c.id);
             if (item.stock > 0) item.stock--;
             
             let finalAmt = c.price - c.discount;
-            grandTotal += finalAmt;
+            grossTotal += c.price;
             totalDiscount += c.discount;
+            netTotal += finalAmt;
+
+            // Income stats update
             totalIncome += finalAmt;
             totalProfit += (finalAmt - item.cost);
             
+            // Receipt Item Row
             receiptHTML += `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px dashed var(--border-color);">
-                    <div>
-                        <strong>${idx+1}. ${c.name}</strong>
-                        ${c.discount > 0 ? 
-                            `<br><small style="color: var(--success-green);">වට්ටම්: Rs. ${c.discount.toFixed(2)}</small>` 
-                            : ''}
-                    </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div>${idx+1}. ${c.name}</div>
                     <div style="text-align: right;">
-                        <div>Rs. ${finalAmt.toFixed(2)}</div>
-                        ${c.discount > 0 ? 
-                            `<small style="color: #999; text-decoration: line-through;">Rs. ${c.price.toFixed(2)}</small>` 
-                            : ''}
+                        ${c.discount > 0 ? `<small style="text-decoration: line-through; color: #888;">${c.price.toFixed(2)}</small> <br>` : ''}
+                        Rs. ${finalAmt.toFixed(2)}
                     </div>
                 </div>`;
         });
+        
+        receiptHTML += `<div style="border-top: 1px dashed var(--border-color); margin-top: 10px; padding-top: 10px;">`;
+        
+        // Subtotal on Receipt
+        receiptHTML += `
+            <div style="display: flex; justify-content: space-between;">
+                <span>උප එකතුව:</span>
+                <span>${grossTotal.toFixed(2)}</span>
+            </div>`;
+            
+        // Discount on Receipt
+        if (totalDiscount > 0) {
+            receiptHTML += `
+            <div style="display: flex; justify-content: space-between; color: var(--discount-color);">
+                <span>වට්ටම්:</span>
+                <span>-${totalDiscount.toFixed(2)}</span>
+            </div>`;
+        }
+
+        // Net Total on Receipt
+        receiptHTML += `
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 5px; color: var(--main-blue);">
+                <span>ගෙවිය යුතු මුදල:</span>
+                <span>Rs. ${netTotal.toFixed(2)}</span>
+            </div>
+        </div>`;
+
+        receiptHTML += `<div style="text-align: center; margin-top: 20px; font-size: 12px;">ස්තූතියි! නැවත එන්න.</div>`;
         
         // Update stats
         document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
         
         // Show receipt popup
         document.getElementById('receiptDetails').innerHTML = receiptHTML;
-        document.getElementById('receiptTotal').innerText = grandTotal.toFixed(2);
-        
-        if (totalDiscount > 0) {
-            document.getElementById('receiptDiscountInfo').innerHTML = 
-                `<strong>මුළු වට්ටම්:</strong> Rs. ${totalDiscount.toFixed(2)}<br>
-                 <small>මුල් මුළු එකතුව: Rs. ${(grandTotal + totalDiscount).toFixed(2)}</small>`;
-        } else {
-            document.getElementById('receiptDiscountInfo').innerHTML = 
-                `<span style="color: #999;">වට්ටම් නැත</span>`;
-        }
-        
         document.getElementById('receiptPopup').style.display = 'flex';
-        
-        // Cast receipt if connected
-        if (castConnected) {
-            alert(`Receipt sent to ${castDeviceName}`);
-        }
         
         // Clear cart and update storage
         cart = [];
@@ -913,18 +913,6 @@
     function closeReceiptPopup() {
         document.getElementById('receiptPopup').style.display = 'none';
     }
-
-    // Close cast devices when clicking outside
-    document.addEventListener('click', function(event) {
-        const castDevices = document.getElementById('castDevices');
-        const castButton = document.querySelector('.btn-cast');
-        
-        if (castDevices.style.display === 'block' && 
-            !castDevices.contains(event.target) && 
-            !castButton.contains(event.target)) {
-            castDevices.style.display = 'none';
-        }
-    });
 
     // Enter key support for popups
     document.addEventListener('keydown', function(event) {
