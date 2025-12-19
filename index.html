@@ -642,26 +642,11 @@
         
         <div class="form-group">
             <label>රිසිට් අංකය (Receipt ID):</label>
-            <input type="text" id="receiptIdSearch" class="form-input" placeholder="රිසිට් අංකය ඇතුළත් කරන්න">
+            <input type="text" id="receiptIdSearch" class="form-input" placeholder="රිසිට් අංකය ඇතුළත් කරන්න" onkeyup="handleReceiptSearch(event)">
             <small style="color: #666;">රිසිට් අංකය ඇතුළත් කර එක් රිසිට් එකක් සොයන්න</small>
         </div>
 
-        <div class="form-group">
-            <label>දිනය (Date):</label>
-            <input type="date" id="dateSearch" class="form-input">
-            <small style="color: #666;">නිශ්චිත දිනයක රිසිට් සොයන්න</small>
-        </div>
-
-        <div class="form-group">
-            <label>දින පරාසය (Date Range):</label>
-            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
-                <input type="date" id="dateFrom" class="form-input" style="flex: 1;">
-                <input type="date" id="dateTo" class="form-input" style="flex: 1;">
-            </div>
-            <small style="color: #666;">දින පරාසයක රිසිට් සොයන්න</small>
-        </div>
-
-        <button class="btn btn-search" onclick="searchReceipts()">
+        <button class="btn btn-search" onclick="searchReceiptById()">
             <span class="btn-icon">🔍</span> රිසිට් සොයන්න
         </button>
 
@@ -904,6 +889,10 @@
         } else if (viewName === 'history') {
             loadRecentReceipts();
             updateReceiptStats();
+            // Auto focus on receipt search
+            setTimeout(() => {
+                document.getElementById('receiptIdSearch').focus();
+            }, 100);
         }
     }
 
@@ -939,6 +928,12 @@
     function handleStockInput(event) {
         if (event.key === "Enter") {
             fillItemName(); // Fill details on scan
+        }
+    }
+
+    function handleReceiptSearch(event) {
+        if (event.key === "Enter") {
+            searchReceiptById();
         }
     }
 
@@ -1342,15 +1337,18 @@
         document.getElementById('todayReceiptsAmount').innerText = "Rs. " + todayAmount.toFixed(2);
     }
 
-    function searchReceipts() {
+    function searchReceiptById() {
         const receiptId = document.getElementById('receiptIdSearch').value.trim();
-        const date = document.getElementById('dateSearch').value;
-        const dateFrom = document.getElementById('dateFrom').value;
-        const dateTo = document.getElementById('dateTo').value;
+        
+        if (!receiptId) {
+            alert("කරුණාකර රිසිට් අංකය ඇතුළත් කරන්න!");
+            document.getElementById('receiptIdSearch').focus();
+            return;
+        }
         
         let filteredReceipts = [...salesHistory];
         
-        // Filter by receipt ID - FIXED: Now properly searches for receiptId
+        // Filter by receipt ID - Exact match or partial match
         if (receiptId) {
             filteredReceipts = filteredReceipts.filter(r => 
                 r.receiptId.toString() === receiptId || 
@@ -1358,42 +1356,24 @@
             );
         }
         
-        // Filter by specific date - FIXED: Now properly compares dates
-        if (date) {
-            const searchDate = new Date(date).toLocaleDateString('si-LK');
-            filteredReceipts = filteredReceipts.filter(r => {
-                const receiptDate = new Date(r.date.split(',')[0]).toLocaleDateString('si-LK');
-                return receiptDate === searchDate;
-            });
-        }
-        
-        // Filter by date range
-        if (dateFrom && dateTo) {
-            const from = new Date(dateFrom).getTime();
-            const to = new Date(dateTo).getTime();
-            
-            filteredReceipts = filteredReceipts.filter(r => {
-                const receiptDate = new Date(r.date.split(',')[0]).getTime();
-                return receiptDate >= from && receiptDate <= to;
-            });
-        }
-        
-        displaySearchResults(filteredReceipts);
-    }
-    
-    function displaySearchResults(receipts) {
-        const resultsDiv = document.getElementById('receiptsResults');
-        
-        if (receipts.length === 0) {
-            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts found matching your search criteria.</p>';
+        if (filteredReceipts.length === 0) {
+            alert("රිසිට් අංකය " + receiptId + " සමඟ රිසිට් කිසිවක් හමු නොවීය!");
+            displayAllRecentReceipts();
             return;
         }
+        
+        displaySearchResults(filteredReceipts, receiptId);
+    }
+    
+    function displaySearchResults(receipts, searchTerm = "") {
+        const resultsDiv = document.getElementById('receiptsResults');
         
         resultsDiv.innerHTML = `
             <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="font-weight: bold; color: var(--main-blue);">
-                        Search Results: ${receipts.length} receipts found
+                        ${searchTerm ? 'Search Results for ID: ' + searchTerm : 'Recent Receipts'}
+                        <span style="font-size: 14px; color: #666;"> (${receipts.length} receipts found)</span>
                     </div>
                     <button class="btn" style="background: #607d8b; color: white; padding: 5px 10px; font-size: 12px;" onclick="displayAllRecentReceipts()">
                         Show All Receipts
@@ -1430,6 +1410,9 @@
                 </div>
             `).join('')}
         `;
+        
+        // Clear search input after successful search
+        document.getElementById('receiptIdSearch').value = '';
     }
 
     function viewReceiptDetails(receiptId) {
@@ -1673,6 +1656,10 @@
         if (document.getElementById('securityPopup').style.display === 'flex' && e.key === 'Escape') { 
             closeSecurityPopup(); 
             e.preventDefault(); 
+        }
+        if (document.getElementById('history-view').classList.contains('active-view') && e.key === 'Escape') { 
+            document.getElementById('receiptIdSearch').value = '';
+            displayAllRecentReceipts();
         }
     });
 
