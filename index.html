@@ -1188,20 +1188,7 @@
         discountItemIndex = null; 
     }
 
-    // Function to directly edit price or stock - REQUIRES PIN IF SYSTEM IS LOCKED
-    function directEdit(id, field) {
-        if (isLocked) {
-            alert("⚠️ " + (field === 'price' ? 'මිල' : 'ස්ටොක් ප්‍රමාණය') + " වෙනස් කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
-            return;
-        }
-        let item = inventory.find(i => i.id === id);
-        if(!item) return;
-        let val = prompt("නව අගය:", field==='price'?item[field].toFixed(2):item[field]);
-        if (val !== null) {
-            item[field] = parseFloat(val);
-            saveToStorage(); renderTable();
-        }
-    }
+
 
     document.addEventListener('keydown', e => {
         if (document.getElementById('itemNamePopup').style.display === 'flex' && e.key === 'Enter') { 
