@@ -386,11 +386,11 @@
         @media print {
             body * { visibility: hidden; }
             #printableReceipt, #printableReceipt * { visibility: visible; }
-            #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; color: black; background: white; }
+            #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; color: black; background: white; font-family: 'Courier New', Courier, monospace; }
             .popup-overlay, header, .nav-tabs, .btn { display: none !important; }
         }
 
-        #printableReceipt { display: none; font-family: 'Courier New', Courier, monospace; padding: 10px; width: 100%; max-width: 300px; margin: 0 auto; }
+        #printableReceipt { display: none; }
 
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
@@ -420,8 +420,6 @@
     <section class="inventory-section">
         <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
             <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Scan Barcode or Type Name..." onkeyup="handleSearchInput(event)">
-            
-          
         </div>
 
         <div class="scroll-box">
@@ -614,7 +612,6 @@
     </div>
 </div>
 
-<!-- New Security PIN Popup -->
 <div id="securityPopup" class="popup-overlay">
     <div class="popup-content security-popup">
         <div class="security-icon">🔒</div>
@@ -678,8 +675,9 @@
         if (savedInv) {
             inventory = JSON.parse(savedInv);
         } else {
-            for (let i = 1; i <= 200; i++) {
-                inventory.push({ id: i, name: "අයිතමය " + i, cost: 100, price: 150, stock: 50 });
+            // Sample items for initial testing
+            for (let i = 1; i <= 50; i++) {
+                inventory.push({ id: i, name: "අයිතමය " + i, cost: Math.floor(Math.random() * 500) + 100, price: Math.floor(Math.random() * 800) + 150, stock: Math.floor(Math.random() * 100) + 10 });
             }
             saveToStorage();
         }
@@ -695,6 +693,15 @@
             document.getElementById('paperSizeSelect').value = paperSize;
         }
 
+        // Load income/profit stats
+        const savedStats = localStorage.getItem('chandana_stats');
+        if (savedStats) {
+            const stats = JSON.parse(savedStats);
+            totalIncome = stats.income || 0;
+            totalProfit = stats.profit || 0;
+            updateStatsDisplay();
+        }
+
         renderTable();
         renderStockHistory();
         
@@ -708,6 +715,16 @@
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
         localStorage.setItem('chandana_stock_history', JSON.stringify(stockHistory));
         localStorage.setItem('chandana_paper_size', paperSize);
+        
+        // Save income/profit stats
+        localStorage.setItem('chandana_stats', JSON.stringify({
+            income: totalIncome,
+            profit: totalProfit
+        }));
+    }
+
+    function updateStatsDisplay() {
+        document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
     }
 
     function switchView(viewName) {
@@ -746,6 +763,8 @@
                 addToCart(exactMatch.id);
                 document.getElementById('searchInput').value = ""; // Clear for next scan
                 renderTable(); // Reset filter
+            } else {
+                alert("භාණ්ඩය හමු නොවීය! ID: " + val);
             }
             return;
         }
@@ -758,9 +777,6 @@
     function handleStockInput(event) {
         if (event.key === "Enter") {
             fillItemName(); // Fill details on scan
-        } else {
-            // Optional: Live search if needed, but for scanners Enter is best
-            fillItemName();
         }
     }
 
@@ -844,6 +860,7 @@
 
         saveToStorage();
         renderStockHistory();
+        renderTable(); // Update POS table
     }
 
     function renderStockHistory() {
@@ -873,9 +890,9 @@
             const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
             return `<tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
-                <td onclick="openItemNamePopup(${item.id})">${item.name}</td>
-                <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
-                <td class="${lowStockClass}" onclick="directEdit(${item.id}, 'stock')">${item.stock}</td>
+                <td>${item.name}</td>
+                <td>${item.price.toFixed(2)}</td>
+                <td class="${lowStockClass}">${item.stock}</td>
             </tr>`;
         }).join('');
     }
@@ -898,7 +915,14 @@
         
         if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
         
-        cart.push({ ...item, discount: 0 });
+        // Check if item already in cart
+        let existingItem = cart.find(c => c.id === idToAdd);
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+            cart.push({ ...item, discount: 0, quantity: 1 });
+        }
+        
         updateCartUI();
         
         // Scroll cart to bottom to see new item
@@ -928,13 +952,13 @@
         let grossTotal = 0, totalDiscount = 0;
         
         list.innerHTML = cart.map((item, idx) => {
-            let finalPrice = item.price - item.discount;
-            grossTotal += item.price;
-            totalDiscount += item.discount;
+            let finalPrice = (item.price - item.discount) * (item.quantity || 1);
+            grossTotal += item.price * (item.quantity || 1);
+            totalDiscount += item.discount * (item.quantity || 1);
             return `<li>
-                    <div style="flex:1"><b>${idx+1}. ${item.name}</b></div>
+                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${(item.quantity || 1) > 1 ? 'x' + (item.quantity || 1) : ''}</div>
                     <div style="text-align:right">
-                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${item.price.toFixed(2)}</span><span class="discount-label">-${item.discount.toFixed(2)}</span>` : ''}
+                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * (item.quantity || 1)).toFixed(2)}</span><span class="discount-label">-${(item.discount * (item.quantity || 1)).toFixed(2)}</span>` : ''}
                         <b>Rs. ${finalPrice.toFixed(2)}</b>
                     </div>
                     <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
@@ -953,56 +977,106 @@
         
         let gross = 0, dis = 0, net = 0;
         let date = new Date().toLocaleString('si-LK');
+        
+        // Build receipt HTML for popup preview
         let receiptHTML = `
-            <div style="text-align:center;">
-                <h3 style="margin:0;">CHANDANA STORES</h3>
-                <div style="font-size:12px;">Tel: 011-1234567</div>
-                <div style="font-size:12px;">${date}</div>
+            <div style="text-align:center; margin-bottom:10px;">
+                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
+                <div style="font-size:12px; margin-bottom:10px;">${date}</div>
             </div>
-            <hr style="border-top: 1px dashed black;">
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="margin-bottom:10px;">
         `;
         
         cart.forEach((c, i) => {
             let item = inventory.find(x => x.id === c.id);
-            if (item) item.stock--; 
-            let final = c.price - c.discount;
-            gross += c.price; dis += c.discount; net += final;
+            if (item) {
+                let reduceQty = c.quantity || 1;
+                if (item.stock >= reduceQty) {
+                    item.stock -= reduceQty;
+                } else {
+                    alert(`${item.name} ස්ටොක් ප්‍රමාණය ප්‍රමාණවත් නැත! (Stock: ${item.stock})`);
+                    item.stock = 0;
+                }
+            }
+            
+            let quantity = c.quantity || 1;
+            let final = (c.price - c.discount) * quantity;
+            gross += c.price * quantity; 
+            dis += c.discount * quantity; 
+            net += final;
             totalIncome += final;
-            if(item) totalProfit += (final - item.cost);
+            
+            if(item) totalProfit += (final - (item.cost * quantity));
 
-            receiptHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:14px;">
-                <div>${c.name}</div>
-                <div style="text-align:right">${c.discount>0 ? `<small style="text-decoration:line-through;">${c.price}</small> `:''} ${final.toFixed(2)}</div>
-            </div>`;
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                    <div>${c.name}${quantity > 1 ? ' x' + quantity : ''}</div>
+                    <div>Rs. ${final.toFixed(2)}</div>
+                </div>`;
         });
 
         receiptHTML += `
-            <hr style="border-top: 1px dashed black;">
-            <div style="display:flex;justify-content:space-between;font-weight:bold;"><span>TOTAL:</span><span>Rs. ${net.toFixed(2)}</span></div>
-            ${dis > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12px;"><span>Saved:</span><span>Rs. ${dis.toFixed(2)}</span></div>` : ''}
-            <hr style="border-top: 1px dashed black;">
-            <div style="text-align:center; font-size:12px;">Thank You Come Again!</div>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                <span>Subtotal:</span>
+                <span>Rs. ${gross.toFixed(2)}</span>
+            </div>
         `;
         
-        document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
+        if (dis > 0) {
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
+                    <span>Discount:</span>
+                    <span>-Rs. ${dis.toFixed(2)}</span>
+                </div>`;
+        }
+        
+        receiptHTML += `
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
+                <span>TOTAL:</span>
+                <span>Rs. ${net.toFixed(2)}</span>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:11px; color:#666;">
+                Thank You!<br>Come Again!
+            </div>
+        `;
+        
+        // Update stats display
+        updateStatsDisplay();
+        
+        // Show receipt in popup
         document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
         document.getElementById('receiptPopup').style.display = 'flex';
         
-        cart = []; updateCartUI(); saveToStorage(); renderTable();
+        // Prepare printable receipt
+        document.getElementById('printableReceipt').innerHTML = receiptHTML;
+        
+        // Clear cart and update UI
+        cart = []; 
+        updateCartUI(); 
+        saveToStorage(); 
+        renderTable();
     }
 
-    function closeReceiptPopup() { document.getElementById('receiptPopup').style.display = 'none'; }
+    function closeReceiptPopup() { 
+        document.getElementById('receiptPopup').style.display = 'none'; 
+    }
 
     // --- Print Functions ---
     function testPrint() {
         const testContent = `
-            <div style="text-align:center; font-weight:bold;">TEST PRINT</div>
-            <div style="text-align:center;">CHANDANA STORES</div>
-            <hr>
-            <div>Printer Connection: OK</div>
-            <div>Time: ${new Date().toLocaleTimeString()}</div>
-            <hr>
-            <div style="text-align:center;">Thank You!</div>
+            <div style="text-align:center; font-weight:bold; font-size:16px;">TEST PRINT</div>
+            <div style="text-align:center; font-size:14px; margin-bottom:10px;">CHANDANA STORES</div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="font-size:13px; margin-bottom:3px;">Printer Connection: OK</div>
+            <div style="font-size:13px; margin-bottom:3px;">Time: ${new Date().toLocaleTimeString()}</div>
+            <div style="font-size:13px; margin-bottom:3px;">Date: ${new Date().toLocaleDateString()}</div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:12px;">Thank You!</div>
         `;
         document.getElementById('printableReceipt').innerHTML = testContent;
         adjustPrintStyles();
@@ -1021,8 +1095,6 @@
     }
 
     function printReceipt() {
-        const content = document.getElementById('receiptPreviewBox').innerHTML;
-        document.getElementById('printableReceipt').innerHTML = content;
         adjustPrintStyles();
         window.print(); 
     }
@@ -1131,26 +1203,6 @@
     
     document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
 
-
-    
-    function confirmItemNameChange() {
-        if (!itemToEdit) return;
-        let val = document.getElementById('newItemName').value.trim();
-        if (val) {
-            let item = inventory.find(i => i.id === itemToEdit);
-            if(item) item.name = val;
-            saveToStorage(); renderTable();
-            cart.forEach(c => { if(c.id === itemToEdit) c.name = val; });
-            updateCartUI();
-        }
-        closeItemNamePopup();
-    }
-    
-    function closeItemNamePopup() { 
-        document.getElementById('itemNamePopup').style.display = 'none'; 
-        itemToEdit = null; 
-    }
-    
     function showDiscountPopup() {
         if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
         let n = parseInt(prompt("වට්ටම් දිය යුතු අංකය (1-" + cart.length + "):"));
@@ -1168,7 +1220,8 @@
         if (d < 0) return alert("ඍණ අගයක් බැහැ!");
         if (d > cart[discountItemIndex].price && !confirm("වට්ටම මිලට වඩා වැඩියි!")) return;
         cart[discountItemIndex].discount = d;
-        updateCartUI(); closeDiscountPopup();
+        updateCartUI(); 
+        closeDiscountPopup();
     }
     
     function closeDiscountPopup() { 
@@ -1176,13 +1229,7 @@
         discountItemIndex = null; 
     }
 
-
-
     document.addEventListener('keydown', e => {
-        if (document.getElementById('itemNamePopup').style.display === 'flex' && e.key === 'Enter') { 
-            confirmItemNameChange(); 
-            e.preventDefault(); 
-        }
         if (document.getElementById('discountPopup').style.display === 'flex' && e.key === 'Enter') { 
             confirmDiscount(); 
             e.preventDefault(); 
