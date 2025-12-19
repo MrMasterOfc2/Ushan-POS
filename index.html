@@ -1,337 +1,141 @@
-
 <!DOCTYPE html>
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHANDANA STORES - PRO POS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHANDANA POS SYSTEM</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a237e">
+
     <style>
-        :root {
-            --main-blue: #1a237e;
-            --success-green: #2e7d32;
-            --error-red: #c62828;
-            --light-gray: #f5f6fa;
-            --text-primary: #000000;
-            --bg-primary: #ffffff;
-            --bg-secondary: #f5f6fa;
-            --border-color: #ddd;
-            --shadow: rgba(0,0,0,0.1);
+        /* මීට පෙර දුන් සියලුම CSS මෝස්තර මෙහි අඩංගු වේ */
+        :root { --main-blue: #1a237e; --success: #2e7d32; --danger: #c62828; --light: #f5f6fa; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        header { background: var(--main-blue); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-tabs { background: #e8eaf6; display: flex; padding: 5px 20px; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 12px 20px; border: none; background: #c5cae9; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; margin-right: 5px; }
+        .tab-btn.active { background: white; border: 1px solid #ddd; border-bottom: 3px solid white; }
+
+        .page { display: none; flex: 1; padding: 15px; gap: 15px; overflow: hidden; }
+        .page.active { display: flex; }
+
+        /* Responsive Design: Mobile සඳහා ස්වයංක්‍රීයව වෙනස් වීම */
+        @media (max-width: 768px) {
+            .page.active { flex-direction: column; overflow-y: auto; }
+            .billing-section { min-width: 100%; height: auto; }
         }
 
-        .dark-mode {
-            --main-blue: #3949ab;
-            --success-green: #4caf50;
-            --error-red: #ef5350;
-            --light-gray: #1e1e1e;
-            --text-primary: #ffffff;
-            --bg-primary: #121212;
-            --bg-secondary: #1e1e1e;
-            --border-color: #333;
-            --shadow: rgba(255,255,255,0.1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        header {
-            background: var(--main-blue);
-            color: white;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .main-wrapper {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            padding: 10px;
-            gap: 15px;
-        }
-
-        .inventory-section {
-            flex: 2;
-            background: var(--bg-primary);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-        }
-
-        .billing-section {
-            flex: 1;
-            background: var(--bg-primary);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            border-left: 5px solid var(--main-blue);
-            border: 1px solid var(--border-color);
-            min-width: 320px;
-        }
-
-        .search-bar {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            margin-bottom: 15px;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-lock { background: #ff9800; color: white; }
-        .btn-unlock { background: #4caf50; color: white; }
-        .btn-pay { 
-            background: var(--success-green); 
-            color: white; 
-            width: 100%; 
-            padding: 15px; 
-            font-size: 18px;
-            margin-top: 10px;
-        }
-
-        .scroll-box {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            background: var(--bg-primary);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: var(--bg-secondary);
-            padding: 12px;
-            position: sticky;
-            top: 0;
-            text-align: left;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        tr:hover { background: var(--bg-secondary); cursor: pointer; }
-        .selected-row { background: rgba(57, 73, 171, 0.1) !important; }
-
-        /* පින්තූරයේ ඇති ආකාරයට බිල්පතේ මෝස්තරය */
-        #cartList li {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .cart-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .price-display {
-            text-align: right;
-        }
-
-        .original-price {
-            text-decoration: line-through;
-            color: var(--error-red);
-            font-size: 12px;
-            display: block;
-        }
-
-        .final-price {
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .discount-label {
-            color: var(--success-green);
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .remove-btn {
-            color: var(--error-red);
-            cursor: pointer;
-            font-size: 20px;
-            text-align: right;
-            display: block;
-            margin-top: 2px;
-        }
-
-        .btn-discount-fixed {
-            background: #a2d2ff;
-            color: #000;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        /* Stock styles */
-        .stock-warning { color: var(--error-red) !important; font-weight: bold; }
-        .nav-tabs { display: flex; background: var(--main-blue); }
-        .nav-tabs button { background: none; border: none; color: white; padding: 12px 20px; cursor: pointer; opacity: 0.7; }
-        .nav-tabs button.active { opacity: 1; border-bottom: 3px solid white; }
-        .page-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-        .page-content.active { display: flex; }
-        .tag { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; color: white; }
-        .tag-sold { background: #4caf50; }
-        .tag-stock-in { background: #2196f3; }
-
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center; align-items: center;
-        }
-        .popup-content { background: var(--bg-primary); padding: 25px; border-radius: 10px; width: 350px; }
-        .popup-input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        /* Tables & Inputs */
+        .inventory-section { flex: 2; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .billing-section { flex: 1; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; border-left: 5px solid var(--main-blue); }
+        .scroll-box { flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #eee; padding: 12px; position: sticky; top: 0; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <button id="themeToggle" style="background:none; border:none; cursor:pointer; font-size: 20px;">🌙</button>
-        <div id="stats" style="color: #ccff90; font-size: 14px;">ආදායම: 0.00 | ලාභය: 0.00</div>
-    </div>
+    <div style="font-size: 22px; font-weight: bold;">CHANDANA STORES</div>
+    <div id="stats" style="color: #ccff90;">ආදායම: 0.00 | ලාභය: 0.00</div>
 </header>
 
 <nav class="nav-tabs">
-    <button id="posTab" class="active" onclick="switchPage('posPage')">POS (බිල්පත්)</button>
-    <button id="stockTab" onclick="switchPage('stockPage')">STOCK (තොග වාර්තා)</button>
+    <button class="tab-btn active" onclick="showPage('sales-page', this)">විකුණුම් (Sales)</button>
+    <button class="tab-btn" onclick="showPage('stock-page', this)">ස්ටොක් සහ වාර්තා</button>
 </nav>
 
-<div id="posPage" class="page-content active">
-    <div class="main-wrapper">
-        <section class="inventory-section">
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="searchInput" class="search-bar" placeholder="සෙවීම..." onkeyup="searchItem()">
-                <button id="lockBtn" class="btn btn-lock" onclick="handleSecurity()">🔒 Unlock</button>
-            </div>
-            <div class="scroll-box">
-                <table>
-                    <thead>
-                        <tr><th>ID</th><th>භාණ්ඩයේ නම</th><th>මිල</th><th>ස්ටොක්</th></tr>
-                    </thead>
-                    <tbody id="inventoryBody"></tbody>
-                </table>
-            </div>
-            <button class="btn" style="background: var(--main-blue); color: white; margin-top: 10px; padding: 15px;" onclick="addToCart()">➕ කාර්ට් එකට දාන්න</button>
-        </section>
+<div id="sales-page" class="page active">
+    <section class="inventory-section">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" id="searchInput" style="flex:1; padding:12px; font-size:16px;" placeholder="භාණ්ඩය සොයන්න හෝ Scan කරන්න..." onkeyup="searchItem()">
+            <button id="lockBtn" class="btn" style="background:#ff9800;" onclick="handleSecurity()">🔒 Unlock</button>
+        </div>
+        <div class="scroll-box">
+            <table>
+                <thead><tr><th>ID</th><th>නම</th><th>මිල</th><th>ස්ටොක්</th></tr></thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+        </div>
+        <button class="btn" style="background: var(--main-blue); margin-top: 15px; font-size:16px;" onclick="addToCart()">කාර්ට් එකට දාන්න (+)</button>
+    </section>
 
-        <section class="billing-section">
-            <h2 style="margin-top: 0;">වත්මන් බිල</h2>
-            <div class="scroll-box">
-                <ul id="cartList" style="list-style: none; padding: 0;"></ul>
-            </div>
-            <div style="margin-top: 10px;">
-                <button class="btn btn-discount-fixed" onclick="showDiscountPopup()">💰 වට්ටම් (Discount)</button>
-                <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: var(--error-red); padding: 5px 0;">
-                    <span>එකතුව:</span>
-                    <span id="grandTotal">0.00</span>
-                </div>
-                <button class="btn btn-pay" onclick="checkout()">💳 ගෙවීම අවසන් කරන්න (PAY)</button>
-            </div>
-        </section>
-    </div>
+    <section class="billing-section">
+        <h3 style="margin-top:0;">වත්මන් බිල</h3>
+        <div class="scroll-box"><ul id="cartList" style="list-style:none; padding:0;"></ul></div>
+        <div style="font-size: 24px; font-weight: bold; color: var(--danger); padding: 10px 0;">එකතුව: <span id="grandTotal">0.00</span></div>
+        <button class="btn" style="background:var(--success); width:100%; font-size:20px; padding:15px;" onclick="checkout()">බිල් කරන්න (PAY)</button>
+    </section>
 </div>
 
-<div id="stockPage" class="page-content">
-    <div class="main-wrapper">
-        <section class="inventory-section">
-            <h3>ස්ටොක් සහ විකුණුම් වාර්තා</h3>
-            <div class="scroll-box">
-                <table>
-                    <thead><tr><th>දිනය</th><th>තත්ත්වය</th><th>භාණ්ඩය</th><th>ප්‍රමාණය</th></tr></thead>
-                    <tbody id="stockLogBody"></tbody>
-                </table>
-            </div>
-        </section>
+<div id="stock-page" class="page" style="flex-direction: column; overflow-y: auto;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
+            <p>අද දින ලාභය</p><h2 id="todayProfit" style="color:var(--success)">0.00</h2>
+        </div>
+        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
+            <p>මුළු ස්ටොක් වියදම</p><h2 id="totalStockCost" style="color:var(--danger)">0.00</h2>
+        </div>
+    </div>
+
+    <div style="background:white; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd;">
+        <h3>අලුත් ස්ටොක් ඇතුළත් කිරීම</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <input type="text" id="stName" style="padding:10px; flex:1;" placeholder="භාණ්ඩයේ නම">
+            <input type="number" id="stCost" style="padding:10px; width:120px;" placeholder="ගැනුම් මිල">
+            <input type="number" id="stQty" style="padding:10px; width:100px;" placeholder="ප්‍රමාණය">
+            <button class="btn" style="background:var(--success);" onclick="addNewStock()">සේව් කරන්න</button>
+        </div>
     </div>
 </div>
-
-<div id="discountPopup" class="popup-overlay"><div class="popup-content">
-    <h3>වට්ටම් ඇතුළත් කරන්න</h3>
-    <input type="number" id="discountAmount" class="popup-input" placeholder="මුදල (Rs.)">
-    <div style="display: flex; gap: 10px;">
-        <button class="btn" style="background:var(--success-green); color:white; flex:1;" onclick="confirmDiscount()">යොදන්න</button>
-        <button class="btn" style="background:#757575; color:white; flex:1;" onclick="closePopup('discountPopup')">අවලංගු කරන්න</button>
-    </div>
-</div></div>
-
-<div id="receiptPopup" class="popup-overlay"><div class="popup-content">
-    <h3>ගෙවීම සාර්ථකයි! ✓</h3>
-    <div id="receiptDetails" style="margin: 15px 0; border-top: 1px solid #ddd; padding-top: 10px;"></div>
-    <h3 style="color:var(--error-red);">මුළු එකතුව: Rs. <span id="receiptTotal">0.00</span></h3>
-    <button class="btn" style="background:var(--main-blue); color:white; width:100%;" onclick="closePopup('receiptPopup')">හරි</button>
-</div></div>
 
 <script>
+    // පද්ධතියේ සියලුම JavaScript දත්ත මෙහි ඇත
     let inventory = [];
     let cart = [];
-    let stockLogs = [];
+    let stockHistory = [];
+    let salesHistory = [];
     let isLocked = true;
     let selectedId = null;
-    let totalIncome = 0;
-    let totalProfit = 0;
-    let discountItemIndex = null;
-    let isDarkMode = false;
 
+    // පද්ධතිය ආරම්භය
     function initialize() {
-        const saved = localStorage.getItem('chandana_db');
-        const logs = localStorage.getItem('chandana_logs');
-        if (saved) {
-            inventory = JSON.parse(saved);
-        } else {
+        const savedInv = localStorage.getItem('chandana_db');
+        const savedStock = localStorage.getItem('stock_history');
+        const savedSales = localStorage.getItem('sales_history');
+        
+        inventory = savedInv ? JSON.parse(savedInv) : [];
+        stockHistory = savedStock ? JSON.parse(savedStock) : [];
+        salesHistory = savedSales ? JSON.parse(savedSales) : [];
+
+        // බඩු 200ක් මුලින්ම නැතිනම් සෑදීම
+        if (inventory.length === 0) {
             for (let i = 1; i <= 200; i++) {
                 inventory.push({ id: i, name: "භාණ්ඩය " + i, cost: 100, price: 150, stock: 50 });
             }
-            saveToStorage();
         }
-        if(logs) stockLogs = JSON.parse(logs);
         renderTable();
-        renderLogs();
+        updateReports();
     }
 
-    function saveToStorage() {
+    function showPage(pageId, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        btn.classList.add('active');
+        if(pageId === 'stock-page') updateReports();
+    }
+
+    function saveAll() {
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
-        localStorage.setItem('chandana_logs', JSON.stringify(stockLogs));
+        localStorage.setItem('stock_history', JSON.stringify(stockHistory));
+        localStorage.setItem('sales_history', JSON.stringify(salesHistory));
     }
 
     function renderTable() {
@@ -339,125 +143,99 @@
         body.innerHTML = inventory.map(item => `
             <tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
-                <td>${item.name}</td>
-                <td>${item.price.toFixed(2)}</td>
-                <td class="${item.stock <= 10 ? 'stock-warning' : ''}">${item.stock} ${item.stock <= 10 ? '⚠️' : ''}</td>
+                <td onclick="directEdit(${item.id}, 'name')">${item.name}</td>
+                <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
+                <td>${item.stock}</td>
             </tr>
         `).join('');
     }
 
     function selectRow(id) {
         selectedId = id;
-        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected-row'));
-        document.getElementById('row-' + id).classList.add('selected-row');
+        document.querySelectorAll('tr').forEach(r => r.style.background="");
+        document.getElementById('row-'+id).style.background="#e3f2fd";
     }
 
     function addToCart() {
-        if (!selectedId) return alert("භාණ්ඩයක් තෝරන්න!");
+        if(!selectedId) return;
         let item = inventory.find(i => i.id === selectedId);
-        if(item.stock <= 0) return alert("තොග අවසන්!");
-        cart.push({ ...item, discount: 0 });
+        cart.push({...item});
         updateCartUI();
     }
 
     function updateCartUI() {
-        const list = document.getElementById('cartList');
-        let total = 0;
-        list.innerHTML = cart.map((item, idx) => {
-            let finalPrice = item.price - item.discount;
-            total += finalPrice;
-            return `
-                <li>
-                    <div class="cart-row">
-                        <div><strong>${idx + 1}. ${item.name}</strong></div>
-                        <div class="price-display">
-                            <span class="final-price">Rs. ${finalPrice.toFixed(2)}</span>
-                            ${item.discount > 0 ? `<span class="original-price">Rs. ${item.price.toFixed(2)}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="cart-row">
-                        <div class="discount-label">${item.discount > 0 ? `වට්ටම: Rs. ${item.discount.toFixed(2)}` : ''}</div>
-                        <div class="remove-btn" onclick="removeFromCart(${idx})">ⓧ</div>
-                    </div>
-                </li>`;
+        let gt = 0;
+        document.getElementById('cartList').innerHTML = cart.map((c, i) => {
+            gt += c.price;
+            return `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                        <span>${c.name}</span>
+                        <span>${c.price.toFixed(2)} <b style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCartUI();">X</b></span>
+                    </li>`;
         }).join('');
-        document.getElementById('grandTotal').innerText = total.toFixed(2);
+        document.getElementById('grandTotal').innerText = gt.toFixed(2);
     }
-
-    function showDiscountPopup() {
-        if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
-        let num = prompt("අයිතම අංකය (1-" + cart.length + "):");
-        if (num > 0 && num <= cart.length) {
-            discountItemIndex = num - 1;
-            document.getElementById('discountPopup').style.display = 'flex';
-        }
-    }
-
-    function confirmDiscount() {
-        let amt = parseFloat(document.getElementById('discountAmount').value) || 0;
-        cart[discountItemIndex].discount = amt;
-        updateCartUI();
-        closePopup('discountPopup');
-        document.getElementById('discountAmount').value = '';
-    }
-
-    function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
 
     function checkout() {
         if (cart.length === 0) return;
+        let billProfit = 0;
         let billTotal = 0;
-        let details = "";
+        let today = new Date().toLocaleDateString();
+
         cart.forEach(c => {
             let item = inventory.find(i => i.id === c.id);
-            item.stock--;
-            let final = c.price - c.discount;
-            billTotal += final;
-            totalIncome += final;
-            totalProfit += (final - item.cost);
-            addLog('SOLD', item.name, 1);
-            details += `<p>${c.name} - Rs. ${final.toFixed(2)}</p>`;
+            if (item.stock > 0) item.stock--;
+            billTotal += c.price;
+            billProfit += (c.price - item.cost);
         });
-        document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
-        document.getElementById('receiptTotal').innerText = billTotal.toFixed(2);
-        document.getElementById('receiptDetails').innerHTML = details;
-        document.getElementById('receiptPopup').style.display = 'flex';
-        cart = []; updateCartUI(); saveToStorage(); renderTable();
+
+        salesHistory.push({ date: today, total: billTotal, profit: billProfit });
+        saveAll();
+        cart = []; updateCartUI(); renderTable();
+        alert("බිල සාර්ථකයි!");
     }
 
-    function addLog(type, name, qty) {
-        stockLogs.unshift({ time: new Date().toLocaleString(), type, name, qty });
-        if(stockLogs.length > 50) stockLogs.pop();
-        saveToStorage();
+    function addNewStock() {
+        let name = document.getElementById('stName').value;
+        let cost = parseFloat(document.getElementById('stCost').value);
+        let qty = parseInt(document.getElementById('stQty').value);
+        if (name && cost && qty) {
+            stockHistory.push({ date: new Date().toLocaleDateString(), name, cost, qty });
+            let item = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+            if (item) { item.stock += qty; item.cost = cost; }
+            saveAll(); renderTable(); updateReports();
+            alert("ස්ටොක් යාවත්කාලීන විය!");
+        }
     }
 
-    function renderLogs() {
-        document.getElementById('stockLogBody').innerHTML = stockLogs.map(log => `
-            <tr><td>${log.time}</td><td><span class="tag ${log.type === 'SOLD' ? 'tag-sold' : 'tag-stock-in'}">${log.type}</span></td><td>${log.name}</td><td>${log.qty}</td></tr>
-        `).join('');
-    }
-
-    function switchPage(p) {
-        document.querySelectorAll('.page-content').forEach(pg => pg.classList.remove('active'));
-        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-        document.getElementById(p).classList.add('active');
-        if(p === 'stockPage') renderLogs();
+    function updateReports() {
+        let today = new Date().toLocaleDateString();
+        let tProfit = salesHistory.filter(s => s.date === today).reduce((a, b) => a + b.profit, 0);
+        let tCost = stockHistory.reduce((a, b) => a + (b.cost * b.qty), 0);
+        document.getElementById('todayProfit').innerText = tProfit.toFixed(2);
+        document.getElementById('totalStockCost').innerText = tCost.toFixed(2);
+        document.getElementById('stats').innerText = `ආදායම: ${salesHistory.reduce((a,b)=>a+b.total,0).toFixed(2)} | ලාභය: ${tProfit.toFixed(2)}`;
     }
 
     function handleSecurity() {
-        if (isLocked) {
-            if (prompt("PIN:") === "1234") { isLocked = false; document.getElementById('lockBtn').innerHTML = '🔓 Unlocked'; }
-        } else { isLocked = true; document.getElementById('lockBtn').innerHTML = '🔒 Unlock'; }
+        let p = prompt("PIN අංකය ඇතුළත් කරන්න (1234):");
+        if(p === "1234") { isLocked = false; document.getElementById('lockBtn').style.background="#4caf50"; alert("Unlocked!"); }
     }
 
-    function closePopup(id) { document.getElementById(id).style.display = 'none'; }
-    
-    document.getElementById('themeToggle').onclick = () => {
-        isDarkMode = !isDarkMode;
-        document.body.classList.toggle('dark-mode');
-        document.getElementById('themeToggle').innerText = isDarkMode ? '☀️' : '🌙';
-    };
+    function directEdit(id, field) {
+        if(isLocked) return;
+        let item = inventory.find(i => i.id === id);
+        let val = prompt("නව අගය:", item[field]);
+        if(val) { item[field] = (field==='name')?val:parseFloat(val); saveAll(); renderTable(); }
+    }
+
+    function searchItem() {
+        let f = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
+        for(let r of rows) { r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none"; }
+    }
 
     window.onload = initialize;
 </script>
+
 </body>
 </html>
