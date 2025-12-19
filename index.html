@@ -159,6 +159,18 @@
             display: flex;
             flex-direction: column;
         }
+        
+        /* --- SETTINGS STYLES --- */
+        .settings-container {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
 
         .form-group {
             margin-bottom: 15px;
@@ -189,7 +201,7 @@
         .summary-card div { font-size: 24px; font-weight: bold; margin-top: 5px; color: var(--main-blue); }
 
         /* Common Elements */
-        .search-bar, .form-input {
+        .search-bar, .form-input, select {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -229,6 +241,7 @@
         .btn-unlock { background: #4caf50; color: white; }
         .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
         .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
+        .btn-print { background: #607d8b; color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; }
 
         /* Table */
         .scroll-box {
@@ -273,9 +286,44 @@
         .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
+        /* --- PRINT STYLES (Device Connection) --- */
+        /* මෙය ක්‍රියාත්මක වන්නේ Print කරන විට පමණි */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableReceipt, #printableReceipt * {
+                visibility: visible;
+            }
+            #printableReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                color: black;
+                background: white;
+            }
+            /* Hide scrollbars and extra UI */
+            .popup-overlay, header, .nav-tabs, .btn {
+                display: none !important;
+            }
+        }
+
+        /* Printable Receipt Container (Hidden on screen usually) */
+        #printableReceipt {
+            display: none; /* Hidden on screen, shown in print media or popup */
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px; /* Default for 80mm printer */
+            margin: 0 auto;
+        }
+
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
-            .billing-section, .stock-form-section, .stock-history-section { min-width: 100%; }
+            .billing-section, .stock-form-section, .stock-history-section, .settings-container { min-width: 100%; }
         }
     </style>
 </head>
@@ -292,6 +340,7 @@
 <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchView('pos')" id="tab-pos">POS / Billing</button>
     <button class="tab-btn" onclick="switchView('stock')" id="tab-stock">Stock Management</button>
+    <button class="tab-btn" onclick="switchView('settings')" id="tab-settings">Settings / Devices</button>
 </div>
 
 <div id="pos-view" class="view-section active-view">
@@ -422,6 +471,40 @@
     </section>
 </div>
 
+<div id="settings-view" class="view-section">
+    <div class="settings-container">
+        <h2 style="color: var(--main-blue);">උපාංග සකසුම් (Device Settings)</h2>
+        <p>ඔබගේ මුද්‍රණ යන්ත්‍රය (Printer) සම්බන්ධ කිරීම සඳහා පහත උපදෙස් අනුගමනය කරන්න.</p>
+        
+        <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 20px;">
+            <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම (Printer Setup)</h3>
+            
+            <div class="form-group">
+                <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
+                <select id="paperSizeSelect" onchange="saveSettings()">
+                    <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
+                    <option value="58mm">58mm (Small Thermal Printer)</option>
+                </select>
+                <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
+            </div>
+
+            <button class="btn btn-print" onclick="testPrint()">
+                <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
+            </button>
+        </div>
+
+        <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
+            <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
+            <ol style="line-height: 1.6;">
+                <li>ඔබේ POS Printer එක USB මගින් පරිගණකයට සම්බන්ධ කරන්න.</li>
+                <li>එහි ඩ්‍රයිවර් (Driver) පරිගණකයේ ස්ථාපනය කර ඇති බව තහවුරු කරගන්න.</li>
+                <li>ඉහත "Test Print" බොත්තම ඔබන්න.</li>
+                <li>එවිට පැමිණෙන කොටුවෙන් (System Dialog) ඔබේ ප්‍රින්ටරය (Example: POS-80) තෝරා Print කරන්න.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
 <div id="itemNamePopup" class="popup-overlay">
     <div class="popup-content">
         <h3>භාණ්ඩයේ නම වෙනස් කරන්න</h3>
@@ -447,10 +530,18 @@
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
         <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
-        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; font-family: 'Courier New', monospace;"></div>
-        <div class="popup-buttons"><button class="btn-confirm" onclick="closeReceiptPopup()">හරි (OK)</button></div>
+        
+        <div id="receiptPreviewBox" style="max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ccc; padding: 10px; background: #fff;">
+            </div>
+
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="printReceipt()" style="background: var(--main-blue);">🖨️ Print Receipt</button>
+            <button class="btn-cancel" onclick="closeReceiptPopup()">වසන්න (Close)</button>
+        </div>
     </div>
 </div>
+
+<div id="printableReceipt"></div>
 
 <script>
     /* --- JavaScript Logic --- */
@@ -465,6 +556,7 @@
     let itemToEdit = null;
     let discountItemIndex = null;
     let isDarkMode = false;
+    let paperSize = '80mm';
 
     // Initialize System
     function initialize() {
@@ -487,6 +579,12 @@
             stockHistory = JSON.parse(savedStock);
         }
 
+        const savedPaper = localStorage.getItem('chandana_paper_size');
+        if (savedPaper) {
+            paperSize = savedPaper;
+            document.getElementById('paperSizeSelect').value = paperSize;
+        }
+
         renderTable();
         renderStockHistory();
     }
@@ -494,27 +592,77 @@
     function saveToStorage() {
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
         localStorage.setItem('chandana_stock_history', JSON.stringify(stockHistory));
+        localStorage.setItem('chandana_paper_size', paperSize);
     }
 
     // --- Navigation System ---
     function switchView(viewName) {
         document.getElementById('pos-view').classList.remove('active-view');
         document.getElementById('stock-view').classList.remove('active-view');
+        document.getElementById('settings-view').classList.remove('active-view');
+        
         document.getElementById('tab-pos').classList.remove('active');
         document.getElementById('tab-stock').classList.remove('active');
+        document.getElementById('tab-settings').classList.remove('active');
 
         if (viewName === 'pos') {
             document.getElementById('pos-view').classList.add('active-view');
             document.getElementById('tab-pos').classList.add('active');
             renderTable(); 
-        } else {
+        } else if (viewName === 'stock') {
             document.getElementById('stock-view').classList.add('active-view');
             document.getElementById('tab-stock').classList.add('active');
             renderStockHistory();
+        } else if (viewName === 'settings') {
+            document.getElementById('settings-view').classList.add('active-view');
+            document.getElementById('tab-settings').classList.add('active');
         }
     }
 
-    // --- Stock Management Logic (Updated for New Items) ---
+    // --- Settings & Printing Logic (NEW) ---
+    function saveSettings() {
+        paperSize = document.getElementById('paperSizeSelect').value;
+        saveToStorage();
+    }
+
+    function testPrint() {
+        const testContent = `
+            <div style="text-align:center; font-weight:bold;">TEST PRINT</div>
+            <div style="text-align:center;">CHANDANA STORES</div>
+            <hr>
+            <div>Printer Connection: OK</div>
+            <div>Time: ${new Date().toLocaleTimeString()}</div>
+            <hr>
+            <div style="text-align:center;">Thank You!</div>
+        `;
+        document.getElementById('printableReceipt').innerHTML = testContent;
+        adjustPrintStyles();
+        window.print(); // Opens System Dialog to Select Device
+    }
+
+    function adjustPrintStyles() {
+        // Adjust width based on settings
+        const container = document.getElementById('printableReceipt');
+        if (paperSize === '58mm') {
+            container.style.maxWidth = '48mm'; // Approximate for 58mm printer margin
+            container.style.fontSize = '12px';
+        } else {
+            container.style.maxWidth = '72mm'; // Approximate for 80mm printer
+            container.style.fontSize = '14px';
+        }
+    }
+
+    function printReceipt() {
+        // The receipt content is already generated in 'checkout' inside 'receiptPreviewBox'
+        // We copy it to the printable area
+        const content = document.getElementById('receiptPreviewBox').innerHTML;
+        document.getElementById('printableReceipt').innerHTML = content;
+        
+        adjustPrintStyles();
+        window.print(); // This triggers the browser's print dialog to select the printer
+    }
+
+    // --- Stock Management Logic ---
     
     function fillItemName() {
         const id = parseInt(document.getElementById('stockItemId').value);
@@ -524,14 +672,10 @@
         const costField = document.getElementById('stockCost');
         
         if (item) {
-            // Existing item: Auto-fill and lock name slightly visually (but keep editable if needed)
             nameField.value = item.name;
             priceField.value = item.price;
             costField.value = item.cost;
         } else {
-            // New item: Clear fields to allow user to type
-            // Don't clear if user is typing a new name/price, only clear if they just changed ID
-            // Simple approach: if name field is empty or holds "Searching...", clear it
             if(nameField.value === "සොයාගත නොහැක" || nameField.value.startsWith("අයිතමය")) {
                 nameField.value = "";
                 priceField.value = "";
@@ -555,31 +699,27 @@
         let item = inventory.find(i => i.id === id);
 
         if (item) {
-            // --- UPDATE EXISTING ITEM ---
             item.stock += qty;
             if (cost > 0) item.cost = cost; 
             if (price > 0) item.price = price;
-            if (name) item.name = name; // Update name if user changed it
+            if (name) item.name = name;
             alert(`ස්ටොක් යාවත්කාලීන විය! නව ප්‍රමාණය: ${item.stock}`);
         } else {
-            // --- ADD NEW ITEM ---
             if (!name) return alert("නව අයිතමයක් සඳහා 'නම' ඇතුළත් කිරීම අනිවාර්යයි.");
             if (!price) return alert("නව අයිතමයක් සඳහා 'විකුණුම් මිල' ඇතුළත් කිරීම අනිවාර්යයි.");
             
             const newItem = {
                 id: id,
                 name: name,
-                cost: cost, // Can be 0 if not entered
+                cost: cost,
                 price: price,
                 stock: qty
             };
             inventory.push(newItem);
-            // Sort inventory by ID for tidiness (optional)
             inventory.sort((a, b) => a.id - b.id);
             alert(`නව අයිතමය සාර්ථකව ඇතුළත් කරන ලදී: ${name}`);
         }
 
-        // Add to History Log
         const log = {
             date: new Date().toLocaleString('si-LK'),
             itemId: id,
@@ -590,7 +730,6 @@
         };
         stockHistory.unshift(log);
 
-        // Clear Form
         document.getElementById('stockItemId').value = '';
         document.getElementById('stockItemName').value = '';
         document.getElementById('stockQty').value = '';
@@ -624,7 +763,7 @@
         document.getElementById('totalStockItemsAdded').innerText = totalItems;
     }
 
-    // --- POS & Standard Logic ---
+    // --- POS Logic ---
 
     function enableDarkMode() {
         document.body.classList.add('dark-mode');
@@ -643,9 +782,7 @@
     function renderTable() {
         const body = document.getElementById('inventoryBody');
         body.innerHTML = inventory.map(item => {
-            // Check for low stock (Less than 20)
             const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
-            
             return `
             <tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
@@ -667,7 +804,6 @@
     function addToCart() {
         if (!selectedId) return alert("භාණ්ඩයක් තෝරාගන්න!");
         let item = inventory.find(i => i.id === selectedId);
-        // Warning if stock is 0
         if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
         
         cart.push({ ...item, discount: 0 });
@@ -711,32 +847,44 @@
         if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
         
         let gross = 0, dis = 0, net = 0;
-        let receiptHTML = `<div style="text-align:center;border-bottom:1px dashed #ccc;padding-bottom:10px;margin-bottom:10px"><strong>CHANDANA STORES</strong></div>`;
+        let date = new Date().toLocaleString('si-LK');
+        let receiptHTML = `
+            <div style="text-align:center;">
+                <h3 style="margin:0;">CHANDANA STORES</h3>
+                <div style="font-size:12px;">Tel: 011-1234567</div>
+                <div style="font-size:12px;">${date}</div>
+            </div>
+            <hr style="border-top: 1px dashed black;">
+        `;
         
         cart.forEach((c, i) => {
             let item = inventory.find(x => x.id === c.id);
-            if (item) {
-                item.stock--; // Reduce stock
-            }
+            if (item) item.stock--; 
             let final = c.price - c.discount;
             gross += c.price; dis += c.discount; net += final;
             totalIncome += final;
             if(item) totalProfit += (final - item.cost);
 
-            receiptHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
-                <div>${i+1}. ${c.name}</div>
-                <div style="text-align:right">${c.discount>0 ? `<small style="text-decoration:line-through;color:#888">${c.price}</small><br>`:''}Rs. ${final.toFixed(2)}</div>
+            receiptHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:14px;">
+                <div>${c.name}</div>
+                <div style="text-align:right">${c.discount>0 ? `<small style="text-decoration:line-through;">${c.price}</small> `:''} ${final.toFixed(2)}</div>
             </div>`;
         });
 
-        receiptHTML += `<div style="border-top:1px dashed #ccc;margin-top:10px;padding-top:10px">
-            <div style="display:flex;justify-content:space-between"><span>උප එකතුව:</span><span>${gross.toFixed(2)}</span></div>
-            ${dis > 0 ? `<div style="display:flex;justify-content:space-between;color:var(--discount-color)"><span>වට්ටම්:</span><span>-${dis.toFixed(2)}</span></div>` : ''}
-            <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:18px;margin-top:5px;color:var(--main-blue)"><span>ගෙවිය යුතු:</span><span>Rs. ${net.toFixed(2)}</span></div>
-        </div>`;
+        receiptHTML += `
+            <hr style="border-top: 1px dashed black;">
+            <div style="display:flex;justify-content:space-between;font-weight:bold;"><span>TOTAL:</span><span>Rs. ${net.toFixed(2)}</span></div>
+            ${dis > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12px;"><span>Saved:</span><span>Rs. ${dis.toFixed(2)}</span></div>` : ''}
+            <hr style="border-top: 1px dashed black;">
+            <div style="text-align:center; font-size:12px;">Thank You Come Again!</div>
+        `;
         
         document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
-        document.getElementById('receiptDetails').innerHTML = receiptHTML;
+        
+        // Populate Preview
+        document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
+        
+        // Show Popup
         document.getElementById('receiptPopup').style.display = 'flex';
         
         cart = []; updateCartUI(); saveToStorage(); renderTable();
@@ -821,7 +969,7 @@
     document.addEventListener('keydown', e => {
         if (document.getElementById('itemNamePopup').style.display === 'flex' && e.key === 'Enter') { confirmItemNameChange(); e.preventDefault(); }
         if (document.getElementById('discountPopup').style.display === 'flex' && e.key === 'Enter') { confirmDiscount(); e.preventDefault(); }
-        if (document.getElementById('receiptPopup').style.display === 'flex' && e.key === 'Enter') { closeReceiptPopup(); e.preventDefault(); }
+        if (document.getElementById('receiptPopup').style.display === 'flex' && e.key === 'Enter') { printReceipt(); e.preventDefault(); }
     });
 
     window.onload = initialize;
