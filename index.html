@@ -661,7 +661,7 @@
     let inventory = [];
     let cart = [];
     let stockHistory = []; 
-    let isLocked = true;
+    let isLocked = true; // System starts locked for editing
     let selectedId = null;
     let totalIncome = 0;
     let totalProfit = 0;
@@ -889,7 +889,7 @@
         if (row) row.classList.add('selected-row');
     }
 
-    // Updated addToCart to accept an ID (for Scanning)
+    // Updated addToCart to accept an ID (for Scanning) - NO PIN REQUIRED
     function addToCart(scanId = null) {
         let idToAdd = scanId ? scanId : selectedId;
 
@@ -915,7 +915,7 @@
         }
     }
     
-    // NEW: Undo Function
+    // NEW: Undo Function - NO PIN REQUIRED
     function undoLastItem() {
         if(cart.length > 0) {
             cart.pop(); // Remove last item
@@ -1033,13 +1033,13 @@
     
     function handleSecurity() {
         if (isLocked) {
-            // Show security popup instead of prompt
+            // Show security popup to unlock system for editing
             openSecurityPopup();
         } else {
             // Lock the system
             isLocked = true;
             updateLockButton();
-            alert("පද්ධතිය Lock කරන ලදී. කරුණාකර අවසර ලත් පරිශීලකයා ලෙස ඇතුළු වන්න.");
+            alert("පද්ධතිය Lock කරන ලදී. දැන් භාණ්ඩවල නම, මිල හෝ ස්ටොක් ප්‍රමාණය වෙනස් කිරීමට අවසර නැත.");
         }
     }
 
@@ -1080,14 +1080,14 @@
         
         // Check if PIN is correct (default: 1234)
         if (enteredPin === "1234") {
-            // Success - unlock system
+            // Success - unlock system for editing
             isLocked = false;
             updateLockButton();
             closeSecurityPopup();
             pinAttempts = 0;
             
             // Show success message
-            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී! දැන් ඔබට වට්ටම්, නම සංස්කරණය කිරීම සහ වෙනත් විශේෂ කාර්යයන් සිදු කළ හැකිය.");
+            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී! දැන් ඔබට භාණ්ඩවල නම, මිල සහ ස්ටොක් ප්‍රමාණය වෙනස් කිරීමට හැකිය.");
             
         } else {
             // Wrong PIN
@@ -1107,10 +1107,10 @@
     function updateLockButton() {
         const lockBtn = document.getElementById('lockBtn');
         if (isLocked) {
-            lockBtn.innerHTML = '<span class="btn-icon">🔒</span> Unlock';
+            lockBtn.innerHTML = '<span class="btn-icon">🔒</span> Unlock for Editing';
             lockBtn.className = "btn btn-lock";
         } else {
-            lockBtn.innerHTML = '<span class="btn-icon">🔓</span> Unlocked';
+            lockBtn.innerHTML = '<span class="btn-icon">🔓</span> Editing Unlocked';
             lockBtn.className = "btn btn-unlock";
         }
     }
@@ -1133,9 +1133,10 @@
     
     document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
 
+    // Function to open item name popup - REQUIRES PIN IF SYSTEM IS LOCKED
     function openItemNamePopup(id) {
         if (isLocked) {
-            alert("⚠️ මෙම කාර්යය සිදු කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
+            alert("⚠️ භාණ්ඩයේ නම වෙනස් කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
             return;
         }
         itemToEdit = id;
@@ -1187,9 +1188,10 @@
         discountItemIndex = null; 
     }
 
+    // Function to directly edit price or stock - REQUIRES PIN IF SYSTEM IS LOCKED
     function directEdit(id, field) {
         if (isLocked) {
-            alert("⚠️ මෙම කාර්යය සිදු කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
+            alert("⚠️ " + (field === 'price' ? 'මිල' : 'ස්ටොක් ප්‍රමාණය') + " වෙනස් කිරීමට පද්ධතිය Unlock කර තිබිය යුතුය. කරුණාකර Unlock බොත්තම ඔබන්න.");
             return;
         }
         let item = inventory.find(i => i.id === id);
