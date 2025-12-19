@@ -2,238 +2,950 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHANDANA POS SYSTEM</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a237e">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHANDANA STORES - PRO POS</title>
     <style>
-        /* මීට පෙර දුන් සියලුම CSS මෝස්තර මෙහි අඩංගු වේ */
-        :root { --main-blue: #1a237e; --success: #2e7d32; --danger: #c62828; --light: #f5f6fa; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        header { background: var(--main-blue); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-tabs { background: #e8eaf6; display: flex; padding: 5px 20px; border-bottom: 2px solid #ddd; }
-        .tab-btn { padding: 12px 20px; border: none; background: #c5cae9; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; margin-right: 5px; }
-        .tab-btn.active { background: white; border: 1px solid #ddd; border-bottom: 3px solid white; }
-
-        .page { display: none; flex: 1; padding: 15px; gap: 15px; overflow: hidden; }
-        .page.active { display: flex; }
-
-        /* Responsive Design: Mobile සඳහා ස්වයංක්‍රීයව වෙනස් වීම */
-        @media (max-width: 768px) {
-            .page.active { flex-direction: column; overflow-y: auto; }
-            .billing-section { min-width: 100%; height: auto; }
+        /* --- 1. මෝස්තර (CSS) - ඕනෑම තිරයකට ගැළපෙන ලෙස (Responsive) --- */
+        :root {
+            --main-blue: #1a237e;
+            --success-green: #2e7d32;
+            --error-red: #c62828;
+            --light-gray: #f5f6fa;
+            --text-primary: #000000;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f6fa;
+            --border-color: #ddd;
+            --shadow: rgba(0,0,0,0.1);
         }
 
-        /* Tables & Inputs */
-        .inventory-section { flex: 2; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .billing-section { flex: 1; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; border-left: 5px solid var(--main-blue); }
-        .scroll-box { flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #eee; padding: 12px; position: sticky; top: 0; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        .dark-mode {
+            --main-blue: #3949ab;
+            --success-green: #4caf50;
+            --error-red: #ef5350;
+            --light-gray: #1e1e1e;
+            --text-primary: #ffffff;
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --border-color: #333;
+            --shadow: rgba(255,255,255,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* ඉහළ තීරුව */
+        header {
+            background: var(--main-blue);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* ප්‍රධාන කොටස */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 10px;
+            gap: 15px;
+        }
+
+        /* බඩු ලැයිස්තුව ඇති කොටස (වම් පස) */
+        .inventory-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        /* බිල ඇති කොටස (දකුණු පස) */
+        .billing-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-left: 5px solid var(--main-blue);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            min-width: 320px;
+            transition: all 0.3s;
+        }
+
+        /* සෙවුම් කොටුව සහ බොත්තම් */
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--main-blue);
+            box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-lock { 
+            background: #ff9800; 
+            color: white;
+            border-color: #e68900;
+        }
+        .btn-unlock { 
+            background: #4caf50; 
+            color: white;
+            border-color: #3d8b40;
+        }
+        .btn-pay { 
+            background: var(--success-green); 
+            color: white; 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 18px;
+            border-color: #1b5e20;
+        }
+        .btn-dark-mode {
+            background: #333;
+            color: white;
+            border-color: #222;
+        }
+        .btn-light-mode {
+            background: #f5f5f5;
+            color: #333;
+            border-color: #ddd;
+        }
+        .btn-cast {
+            background: #5c6bc0;
+            color: white;
+            border-color: #3f51b5;
+        }
+
+        /* වගුව (Table) */
+        .scroll-box {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--bg-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            padding: 12px;
+            position: sticky;
+            top: 0;
+            text-align: left;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:hover { 
+            background: var(--bg-secondary); 
+            cursor: pointer; 
+        }
+        .selected-row { 
+            background: rgba(57, 73, 171, 0.1) !important; 
+            border-left: 3px solid var(--main-blue);
+        }
+
+        /* Popup වින්ඩෝව */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+
+        .popup-content {
+            background: var(--bg-primary);
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .popup-content h3 {
+            margin-top: 0;
+            color: var(--main-blue);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .popup-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .popup-input:focus {
+            outline: none;
+            border-color: var(--main-blue);
+            box-shadow: 0 0 0 2px rgba(57, 73, 171, 0.2);
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .popup-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .btn-confirm { 
+            background: var(--success-green); 
+            color: white;
+            border-color: #1b5e20;
+        }
+        .btn-cancel { 
+            background: #757575; 
+            color: white;
+            border-color: #616161;
+        }
+
+        /* Cast වින්ඩෝව */
+        .cast-devices {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 25px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            z-index: 100;
+            min-width: 200px;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .cast-devices h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--main-blue);
+        }
+
+        .device-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .device-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .device-list li:hover {
+            background: var(--bg-secondary);
+        }
+
+        .device-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Cart item styling */
+        #cartList li {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s;
+        }
+
+        #cartList li:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Mobile එකකදී පෙනුම වෙනස් වීම */
+        @media (max-width: 768px) {
+            .main-wrapper { 
+                flex-direction: column; 
+                overflow-y: auto; 
+            }
+            .billing-section { 
+                min-width: 100%; 
+                height: 500px; 
+            }
+            .popup-content { 
+                width: 90%; 
+                padding: 20px; 
+            }
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Stats display */
+        .stats-display {
+            font-size: 14px;
+            color: #ccff90;
+            text-align: right;
+        }
+
+        /* Button icons */
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        /* Loading animation for cast */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 22px; font-weight: bold;">CHANDANA STORES</div>
-    <div id="stats" style="color: #ccff90;">ආදායම: 0.00 | ලාභය: 0.00</div>
+    <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
+    <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">
+            🌙
+        </button>
+        
+        <div class="stats-display" id="stats">ආදායම: 0.00 | ලාභය: 0.00</div>
+    </div>
+    
+
+
 </header>
 
-<nav class="nav-tabs">
-    <button class="tab-btn active" onclick="showPage('sales-page', this)">විකුණුම් (Sales)</button>
-    <button class="tab-btn" onclick="showPage('stock-page', this)">ස්ටොක් සහ වාර්තා</button>
-</nav>
-
-<div id="sales-page" class="page active">
+<div class="main-wrapper">
     <section class="inventory-section">
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="text" id="searchInput" style="flex:1; padding:12px; font-size:16px;" placeholder="භාණ්ඩය සොයන්න හෝ Scan කරන්න..." onkeyup="searchItem()">
-            <button id="lockBtn" class="btn" style="background:#ff9800;" onclick="handleSecurity()">🔒 Unlock</button>
+            <input type="text" id="searchInput" class="search-bar" placeholder="භාණ්ඩයේ නම සෙවීම හෝ Scan කරන්න..." onkeyup="searchItem()">
+            <button id="lockBtn" class="btn btn-lock" onclick="handleSecurity()">
+                <span class="btn-icon">🔒</span> Unlock
+            </button>
         </div>
+
         <div class="scroll-box">
             <table>
-                <thead><tr><th>ID</th><th>නම</th><th>මිල</th><th>ස්ටොක්</th></tr></thead>
-                <tbody id="inventoryBody"></tbody>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>භාණ්ඩයේ නම</th>
+                        <th>මිල</th>
+                        <th>ස්ටොක්</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- Items will be loaded here -->
+                </tbody>
             </table>
         </div>
-        <button class="btn" style="background: var(--main-blue); margin-top: 15px; font-size:16px;" onclick="addToCart()">කාර්ට් එකට දාන්න (+)</button>
+        <button class="btn" style="background: var(--main-blue); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
+            <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න
+        </button>
     </section>
 
     <section class="billing-section">
-        <h3 style="margin-top:0;">වත්මන් බිල</h3>
-        <div class="scroll-box"><ul id="cartList" style="list-style:none; padding:0;"></ul></div>
-        <div style="font-size: 24px; font-weight: bold; color: var(--danger); padding: 10px 0;">එකතුව: <span id="grandTotal">0.00</span></div>
-        <button class="btn" style="background:var(--success); width:100%; font-size:20px; padding:15px;" onclick="checkout()">බිල් කරන්න (PAY)</button>
+        <h2 style="margin-top: 0;">වත්මන් බිල</h2>
+        <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none;">
+            <ul id="cartList" style="list-style: none; padding: 0;"></ul>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <button class="btn" style="background: #607d8b; color: white; width: 100%; margin-bottom: 5px; border-color: #546e7a;" onclick="showDiscountPopup()">
+                <span class="btn-icon">💰</span> වට්ටම් (Discount)
+            </button>
+            <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: var(--error-red); padding: 10px 0; border-top: 2px solid var(--border-color);">
+                <span>එකතුව:</span>
+                <span id="grandTotal">0.00</span>
+            </div>
+            <button class="btn btn-pay" onclick="checkout()">
+                <span class="btn-icon">💳</span> ගෙවීම අවසන් කරන්න (PAY)
+            </button>
+        </div>
     </section>
 </div>
 
-<div id="stock-page" class="page" style="flex-direction: column; overflow-y: auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
-            <p>අද දින ලාභය</p><h2 id="todayProfit" style="color:var(--success)">0.00</h2>
-        </div>
-        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
-            <p>මුළු ස්ටොක් වියදම</p><h2 id="totalStockCost" style="color:var(--danger)">0.00</h2>
+<!-- Popup for changing item name -->
+<div id="itemNamePopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3>භාණ්ඩයේ නම වෙනස් කරන්න</h3>
+        <input type="text" id="newItemName" class="popup-input" placeholder="නව නම ඇතුළත් කරන්න">
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="confirmItemNameChange()">අනුමත කරන්න</button>
+            <button class="btn-cancel" onclick="closeItemNamePopup()">අවලංගු කරන්න</button>
         </div>
     </div>
+</div>
 
-    <div style="background:white; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd;">
-        <h3>අලුත් ස්ටොක් ඇතුළත් කිරීම</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-            <input type="text" id="stName" style="padding:10px; flex:1;" placeholder="භාණ්ඩයේ නම">
-            <input type="number" id="stCost" style="padding:10px; width:120px;" placeholder="ගැනුම් මිල">
-            <input type="number" id="stQty" style="padding:10px; width:100px;" placeholder="ප්‍රමාණය">
-            <button class="btn" style="background:var(--success);" onclick="addNewStock()">සේව් කරන්න</button>
+<!-- Popup for discount -->
+<div id="discountPopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3>වට්ටම් ඇතුළත් කරන්න</h3>
+        <input type="number" id="discountAmount" class="popup-input" placeholder="වට්ටම් රුපියල් (Rs)" min="0" step="0.01">
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="confirmDiscount()">වට්ටම් යොදන්න</button>
+            <button class="btn-cancel" onclick="closeDiscountPopup()">අවලංගු කරන්න</button>
+        </div>
+    </div>
+</div>
+
+<!-- Popup for checkout success message -->
+<div id="receiptPopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3>ගෙවීම සාර්ථකයි! ✓</h3>
+        <div id="receiptDetails" style="max-height: 300px; overflow-y: auto; margin: 15px 0; padding-right: 10px;">
+            <!-- Receipt details will be shown here -->
+        </div>
+        <div style="border-top: 2px solid var(--border-color); padding-top: 15px;">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; color: var(--error-red);">
+                <span>මුළු එකතුව:</span>
+                <span id="receiptTotal">0.00</span>
+            </div>
+            <div id="receiptDiscountInfo" style="color: var(--success-green); margin-top: 10px;">
+                <!-- Discount information will be shown here -->
+            </div>
+        </div>
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="closeReceiptPopup()">හරි</button>
         </div>
     </div>
 </div>
 
 <script>
-    // පද්ධතියේ සියලුම JavaScript දත්ත මෙහි ඇත
+    /* --- 2. දත්ත සහ වැඩකෑලි (JavaScript) --- */
+
     let inventory = [];
     let cart = [];
-    let stockHistory = [];
-    let salesHistory = [];
     let isLocked = true;
     let selectedId = null;
+    let totalIncome = 0;
+    let totalProfit = 0;
+    let itemToEdit = null;
+    let discountItemIndex = null;
+    let isDarkMode = false;
+    let castConnected = false;
+    let castDeviceName = null;
 
-    // පද්ධතිය ආරම්භය
+    // පද්ධතිය ආරම්භයේදී බඩු 200 ක් සෑදීම
     function initialize() {
-        const savedInv = localStorage.getItem('chandana_db');
-        const savedStock = localStorage.getItem('stock_history');
-        const savedSales = localStorage.getItem('sales_history');
-        
-        inventory = savedInv ? JSON.parse(savedInv) : [];
-        stockHistory = savedStock ? JSON.parse(savedStock) : [];
-        salesHistory = savedSales ? JSON.parse(savedSales) : [];
+        // Check for saved theme
+        const savedTheme = localStorage.getItem('chandana_theme');
+        if (savedTheme === 'dark') {
+            enableDarkMode();
+        } else {
+            enableLightMode();
+        }
 
-        // බඩු 200ක් මුලින්ම නැතිනම් සෑදීම
-        if (inventory.length === 0) {
+        // Check for saved data
+        const saved = localStorage.getItem('chandana_db');
+        if (saved) {
+            inventory = JSON.parse(saved);
+        } else {
             for (let i = 1; i <= 200; i++) {
-                inventory.push({ id: i, name: "භාණ්ඩය " + i, cost: 100, price: 150, stock: 50 });
+                inventory.push({
+                    id: i,
+                    name: "අයිතමය " + i,
+                    cost: 100,
+                    price: 150,
+                    stock: 50
+                });
             }
+            saveToStorage();
         }
         renderTable();
-        updateReports();
     }
 
-    function showPage(pageId, btn) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        btn.classList.add('active');
-        if(pageId === 'stock-page') updateReports();
-    }
-
-    function saveAll() {
+    // දත්ත සේව් කිරීම (Offline)
+    function saveToStorage() {
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
-        localStorage.setItem('stock_history', JSON.stringify(stockHistory));
-        localStorage.setItem('sales_history', JSON.stringify(salesHistory));
     }
 
+    // Dark Mode සක්‍රීය කිරීම
+    function enableDarkMode() {
+        document.body.classList.add('dark-mode');
+        isDarkMode = true;
+        document.getElementById('themeToggle').innerHTML = '☀️';
+        document.getElementById('themeToggle').title = 'Light Mode';
+        localStorage.setItem('chandana_theme', 'dark');
+    }
+
+    // Light Mode සක්‍රීය කිරීම
+    function enableLightMode() {
+        document.body.classList.remove('dark-mode');
+        isDarkMode = false;
+        document.getElementById('themeToggle').innerHTML = '🌙';
+        document.getElementById('themeToggle').title = 'Dark Mode';
+        localStorage.setItem('chandana_theme', 'light');
+    }
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', function() {
+        if (isDarkMode) {
+            enableLightMode();
+        } else {
+            enableDarkMode();
+        }
+    });
+
+    // Cast devices toggle
+    function toggleCastDevices() {
+        const castDevices = document.getElementById('castDevices');
+        if (castDevices.style.display === 'block') {
+            castDevices.style.display = 'none';
+        } else {
+            castDevices.style.display = 'block';
+        }
+    }
+
+    // Connect to cast device
+    function connectToDevice(deviceName) {
+        castConnected = true;
+        castDeviceName = deviceName;
+        document.getElementById('castDevices').style.display = 'none';
+        
+        // Update cast button
+        const castBtn = document.querySelector('.btn-cast');
+        castBtn.innerHTML = '<span class="btn-icon loading">📺</span> Connecting...';
+        
+        // Simulate connection delay
+        setTimeout(() => {
+            castBtn.innerHTML = `<span class="btn-icon">📺</span> Casting to ${deviceName}`;
+            castBtn.style.background = '#4caf50';
+            castBtn.style.borderColor = '#2e7d32';
+            
+            // Show success message
+            alert(`Successfully connected to ${deviceName}`);
+        }, 1500);
+    }
+
+    // වගුව ඇඳීම
     function renderTable() {
         const body = document.getElementById('inventoryBody');
         body.innerHTML = inventory.map(item => `
             <tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
-                <td onclick="directEdit(${item.id}, 'name')">${item.name}</td>
+                <td onclick="openItemNamePopup(${item.id})">${item.name}</td>
                 <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
-                <td>${item.stock}</td>
+                <td onclick="directEdit(${item.id}, 'stock')">${item.stock}</td>
             </tr>
         `).join('');
     }
 
-    function selectRow(id) {
-        selectedId = id;
-        document.querySelectorAll('tr').forEach(r => r.style.background="");
-        document.getElementById('row-'+id).style.background="#e3f2fd";
+    // අයිතම නම වෙනස් කිරීමට popup එක අරින්න
+    function openItemNamePopup(id) {
+        if (isLocked) return;
+        itemToEdit = id;
+        let item = inventory.find(i => i.id === id);
+        document.getElementById('newItemName').value = item.name;
+        document.getElementById('itemNamePopup').style.display = 'flex';
+        document.getElementById('newItemName').focus();
     }
 
-    function addToCart() {
-        if(!selectedId) return;
-        let item = inventory.find(i => i.id === selectedId);
-        cart.push({...item});
-        updateCartUI();
+    // අයිතම නම වෙනස් කිරීම තහවුරු කරන්න
+    function confirmItemNameChange() {
+        if (!itemToEdit) return;
+        let newName = document.getElementById('newItemName').value.trim();
+        if (newName) {
+            let item = inventory.find(i => i.id === itemToEdit);
+            item.name = newName;
+            saveToStorage();
+            renderTable();
+            
+            // Update cart if item is in cart
+            cart.forEach(cartItem => {
+                if (cartItem.id === itemToEdit) {
+                    cartItem.name = newName;
+                }
+            });
+            updateCartUI();
+        }
+        closeItemNamePopup();
     }
 
-    function updateCartUI() {
-        let gt = 0;
-        document.getElementById('cartList').innerHTML = cart.map((c, i) => {
-            gt += c.price;
-            return `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                        <span>${c.name}</span>
-                        <span>${c.price.toFixed(2)} <b style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCartUI();">X</b></span>
-                    </li>`;
-        }).join('');
-        document.getElementById('grandTotal').innerText = gt.toFixed(2);
+    // අයිතම නම popup වසන්න
+    function closeItemNamePopup() {
+        document.getElementById('itemNamePopup').style.display = 'none';
+        itemToEdit = null;
     }
 
-    function checkout() {
-        if (cart.length === 0) return;
-        let billProfit = 0;
-        let billTotal = 0;
-        let today = new Date().toLocaleDateString();
-
-        cart.forEach(c => {
-            let item = inventory.find(i => i.id === c.id);
-            if (item.stock > 0) item.stock--;
-            billTotal += c.price;
-            billProfit += (c.price - item.cost);
-        });
-
-        salesHistory.push({ date: today, total: billTotal, profit: billProfit });
-        saveAll();
-        cart = []; updateCartUI(); renderTable();
-        alert("බිල සාර්ථකයි!");
-    }
-
-    function addNewStock() {
-        let name = document.getElementById('stName').value;
-        let cost = parseFloat(document.getElementById('stCost').value);
-        let qty = parseInt(document.getElementById('stQty').value);
-        if (name && cost && qty) {
-            stockHistory.push({ date: new Date().toLocaleDateString(), name, cost, qty });
-            let item = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-            if (item) { item.stock += qty; item.cost = cost; }
-            saveAll(); renderTable(); updateReports();
-            alert("ස්ටොක් යාවත්කාලීන විය!");
+    // සෙවීම (Search)
+    function searchItem() {
+        let filter = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
+        for (let row of rows) {
+            row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
         }
     }
 
-    function updateReports() {
-        let today = new Date().toLocaleDateString();
-        let tProfit = salesHistory.filter(s => s.date === today).reduce((a, b) => a + b.profit, 0);
-        let tCost = stockHistory.reduce((a, b) => a + (b.cost * b.qty), 0);
-        document.getElementById('todayProfit').innerText = tProfit.toFixed(2);
-        document.getElementById('totalStockCost').innerText = tCost.toFixed(2);
-        document.getElementById('stats').innerText = `ආදායම: ${salesHistory.reduce((a,b)=>a+b.total,0).toFixed(2)} | ලාභය: ${tProfit.toFixed(2)}`;
-    }
-
+    // ආරක්ෂක ලොක් එක (Security)
     function handleSecurity() {
-        let p = prompt("PIN අංකය ඇතුළත් කරන්න (1234):");
-        if(p === "1234") { isLocked = false; document.getElementById('lockBtn').style.background="#4caf50"; alert("Unlocked!"); }
+        if (isLocked) {
+            let pin = prompt("PIN අංකය ඇතුළත් කරන්න (1234):");
+            if (pin === "1234") {
+                isLocked = false;
+                document.getElementById('lockBtn').innerHTML = '<span class="btn-icon">🔓</span> Unlocked';
+                document.getElementById('lockBtn').className = "btn btn-unlock";
+            } else { 
+                alert("වැරදි PIN එකක්!");
+            }
+        } else {
+            isLocked = true;
+            document.getElementById('lockBtn').innerHTML = '<span class="btn-icon">🔒</span> Unlock';
+            document.getElementById('lockBtn').className = "btn btn-lock";
+        }
     }
 
+    // කෙලින්ම එඩිට් කිරීම (මිල සහ ස්ටොක්)
     function directEdit(id, field) {
-        if(isLocked) return;
+        if (isLocked) return;
         let item = inventory.find(i => i.id === id);
-        let val = prompt("නව අගය:", item[field]);
-        if(val) { item[field] = (field==='name')?val:parseFloat(val); saveAll(); renderTable(); }
+        let currentValue = field === 'price' ? item[field].toFixed(2) : item[field];
+        let newVal = prompt("නව අගය ඇතුළත් කරන්න:", currentValue);
+        if (newVal !== null) {
+            item[field] = parseFloat(newVal);
+            saveToStorage();
+            renderTable();
+        }
     }
 
-    function searchItem() {
-        let f = document.getElementById('searchInput').value.toLowerCase();
-        let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
-        for(let r of rows) { r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none"; }
+    // පේළියක් තේරීම
+    function selectRow(id) {
+        selectedId = id;
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected-row'));
+        const selectedRow = document.getElementById('row-' + id);
+        if (selectedRow) {
+            selectedRow.classList.add('selected-row');
+        }
     }
 
+    // කාර්ට් එකට ඇඩ් කිරීම
+    function addToCart() {
+        if (!selectedId) {
+            alert("කරුණාකර පළමුව භාණ්ඩයක් තෝරාගන්න!");
+            return;
+        }
+        let item = inventory.find(i => i.id === selectedId);
+        cart.push({ ...item, discount: 0 });
+        updateCartUI();
+    }
+
+    // කාර්ට් එකෙන් අයින් කිරීම
+    function removeFromCart(index) {
+        if (confirm("මෙම අයිතමය ඉවත් කිරීමට අවශ්‍යද?")) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+    }
+
+    // වට්ටම් popup එක පෙන්වන්න
+    function showDiscountPopup() {
+        if (cart.length === 0) {
+            alert("කාර්ට් එක හිස් වී ඇත!");
+            return;
+        }
+        
+        let itemNum = prompt("වට්ටම් දිය යුතු අයිතමයේ අංකය ඇතුළත් කරන්න (1-" + cart.length + "):");
+        itemNum = parseInt(itemNum);
+        
+        if (itemNum > 0 && itemNum <= cart.length) {
+            discountItemIndex = itemNum - 1;
+            document.getElementById('discountAmount').value = "";
+            document.getElementById('discountPopup').style.display = 'flex';
+            document.getElementById('discountAmount').focus();
+        } else {
+            alert("වලංගු අංකයක් ඇතුළත් කරන්න!");
+        }
+    }
+
+    // වට්ටම් තහවුරු කරන්න
+    function confirmDiscount() {
+        if (discountItemIndex === null) return;
+        let discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+        
+        if (discount < 0) {
+            alert("වට්ටම් ඍණ අගයක් විය නොහැක!");
+            return;
+        }
+        
+        if (discount > cart[discountItemIndex].price) {
+            if (!confirm("වට්ටම් අයිතමයේ මුළු මිලට වඩා වැඩි වේ! තහවුරු කරන්නද?")) {
+                return;
+            }
+        }
+        
+        cart[discountItemIndex].discount = discount;
+        updateCartUI();
+        closeDiscountPopup();
+    }
+
+    // වට්ටම් popup වසන්න
+    function closeDiscountPopup() {
+        document.getElementById('discountPopup').style.display = 'none';
+        discountItemIndex = null;
+    }
+
+    // බිල පෙන්වන කොටස අලුත් කිරීම
+    function updateCartUI() {
+        const list = document.getElementById('cartList');
+        let grandTotal = 0;
+        let totalDiscount = 0;
+        
+        list.innerHTML = cart.map((item, idx) => {
+            let finalPrice = item.price - item.discount;
+            grandTotal += finalPrice;
+            totalDiscount += item.discount;
+            
+            return `
+                <li>
+                    <div>
+                        <strong>${idx+1}. ${item.name}</strong>
+                        ${item.discount > 0 ? 
+                            `<br><small style="color: var(--success-green);">වට්ටම්: Rs. ${item.discount.toFixed(2)}</small>` 
+                            : ''}
+                    </div>
+                    <div style="text-align: right;">
+                        <div>Rs. ${finalPrice.toFixed(2)}</div>
+                        ${item.discount > 0 ? 
+                            `<small style="color: #999; text-decoration: line-through;">Rs. ${item.price.toFixed(2)}</small>` 
+                            : ''}
+                        <div>
+                            <b style="color: var(--error-red); cursor: pointer; font-size: 18px; margin-left: 10px; padding: 2px 6px; border-radius: 50%; border: 1px solid var(--error-red);" 
+                               onclick="removeFromCart(${idx})" title="ඉවත් කරන්න">✕</b>
+                        </div>
+                    </div>
+                </li>`;
+        }).join('');
+        
+        document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
+        
+        // Cast to device if connected
+        if (castConnected) {
+            updateCastDisplay();
+        }
+    }
+
+    // Update cast display
+    function updateCastDisplay() {
+        // In a real app, this would send data to the cast device
+        console.log(`Updating cast display for ${castDeviceName}`);
+    }
+
+    // බිල අවසන් කිරීම (Checkout) සහ රිසීට් පෙන්වන්න
+    function checkout() {
+        if (cart.length === 0) {
+            alert("කාර්ට් එක හිස් වී ඇත!");
+            return;
+        }
+        
+        // Calculate totals
+        let grandTotal = 0;
+        let totalDiscount = 0;
+        let receiptHTML = "<h4>භාණ්ඩ ලැයිස්තුව:</h4>";
+        
+        cart.forEach((c, idx) => {
+            let item = inventory.find(i => i.id === c.id);
+            if (item.stock > 0) item.stock--;
+            
+            let finalAmt = c.price - c.discount;
+            grandTotal += finalAmt;
+            totalDiscount += c.discount;
+            totalIncome += finalAmt;
+            totalProfit += (finalAmt - item.cost);
+            
+            receiptHTML += `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px dashed var(--border-color);">
+                    <div>
+                        <strong>${idx+1}. ${c.name}</strong>
+                        ${c.discount > 0 ? 
+                            `<br><small style="color: var(--success-green);">වට්ටම්: Rs. ${c.discount.toFixed(2)}</small>` 
+                            : ''}
+                    </div>
+                    <div style="text-align: right;">
+                        <div>Rs. ${finalAmt.toFixed(2)}</div>
+                        ${c.discount > 0 ? 
+                            `<small style="color: #999; text-decoration: line-through;">Rs. ${c.price.toFixed(2)}</small>` 
+                            : ''}
+                    </div>
+                </div>`;
+        });
+        
+        // Update stats
+        document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
+        
+        // Show receipt popup
+        document.getElementById('receiptDetails').innerHTML = receiptHTML;
+        document.getElementById('receiptTotal').innerText = grandTotal.toFixed(2);
+        
+        if (totalDiscount > 0) {
+            document.getElementById('receiptDiscountInfo').innerHTML = 
+                `<strong>මුළු වට්ටම්:</strong> Rs. ${totalDiscount.toFixed(2)}<br>
+                 <small>මුල් මුළු එකතුව: Rs. ${(grandTotal + totalDiscount).toFixed(2)}</small>`;
+        } else {
+            document.getElementById('receiptDiscountInfo').innerHTML = 
+                `<span style="color: #999;">වට්ටම් නැත</span>`;
+        }
+        
+        document.getElementById('receiptPopup').style.display = 'flex';
+        
+        // Cast receipt if connected
+        if (castConnected) {
+            alert(`Receipt sent to ${castDeviceName}`);
+        }
+        
+        // Clear cart and update storage
+        cart = [];
+        updateCartUI();
+        saveToStorage();
+        renderTable();
+    }
+
+    // රිසීට් popup වසන්න
+    function closeReceiptPopup() {
+        document.getElementById('receiptPopup').style.display = 'none';
+    }
+
+    // Close cast devices when clicking outside
+    document.addEventListener('click', function(event) {
+        const castDevices = document.getElementById('castDevices');
+        const castButton = document.querySelector('.btn-cast');
+        
+        if (castDevices.style.display === 'block' && 
+            !castDevices.contains(event.target) && 
+            !castButton.contains(event.target)) {
+            castDevices.style.display = 'none';
+        }
+    });
+
+    // Enter key support for popups
+    document.addEventListener('keydown', function(event) {
+        // Item name popup
+        if (document.getElementById('itemNamePopup').style.display === 'flex' && event.key === 'Enter') {
+            confirmItemNameChange();
+            event.preventDefault();
+        }
+        // Discount popup
+        if (document.getElementById('discountPopup').style.display === 'flex' && event.key === 'Enter') {
+            confirmDiscount();
+            event.preventDefault();
+        }
+        // Receipt popup
+        if (document.getElementById('receiptPopup').style.display === 'flex' && event.key === 'Enter') {
+            closeReceiptPopup();
+            event.preventDefault();
+        }
+    });
+
+    // පද්ධතිය පණ ගැන්වීම
     window.onload = initialize;
 </script>
 
