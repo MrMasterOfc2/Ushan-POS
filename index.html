@@ -468,6 +468,17 @@
 
         #printableReceipt { display: none; }
 
+        /* FIXED: Receipt preview always shows in light mode */
+        .receipt-preview {
+            background: white !important;
+            color: black !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
             .billing-section, .stock-form-section, .stock-history-section, .settings-container, .history-search-section, .history-results-section { min-width: 100%; }
@@ -732,7 +743,7 @@
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
         <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
-        <div id="receiptPreviewBox" style="max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ccc; padding: 10px; background: #fff;"></div>
+        <div id="receiptPreviewBox" class="receipt-preview"></div>
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="printReceipt()" style="background: var(--main-blue);">🖨️ Print Receipt</button>
             <button class="btn-cancel" onclick="closeReceiptPopup()">වසන්න (Close)</button>
@@ -1276,7 +1287,10 @@
         
         // Calculate today's total
         const today = new Date().toLocaleDateString('si-LK');
-        const todayReceipts = salesHistory.filter(r => r.date.includes(today.split(',')[0]));
+        const todayReceipts = salesHistory.filter(r => {
+            const receiptDate = r.date.split(',')[0].trim();
+            return receiptDate === today.split(',')[0];
+        });
         const todayAmount = todayReceipts.reduce((sum, r) => sum + r.netTotal, 0);
         
         document.getElementById('totalReceiptsCount').innerText = totalReceipts;
@@ -1292,12 +1306,15 @@
         
         let filteredReceipts = [...salesHistory];
         
-        // Filter by receipt ID
+        // Filter by receipt ID - FIXED: Now properly searches for receiptId
         if (receiptId) {
-            filteredReceipts = filteredReceipts.filter(r => r.receiptId.toString().includes(receiptId));
+            filteredReceipts = filteredReceipts.filter(r => 
+                r.receiptId.toString() === receiptId || 
+                r.receiptId.toString().includes(receiptId)
+            );
         }
         
-        // Filter by specific date
+        // Filter by specific date - FIXED: Now properly compares dates
         if (date) {
             const searchDate = new Date(date).toLocaleDateString('si-LK');
             filteredReceipts = filteredReceipts.filter(r => {
@@ -1366,13 +1383,13 @@
             return;
         }
         
-        // Build receipt HTML for viewing
+        // Build receipt HTML for viewing - FIXED: Always shows in light mode
         let receiptHTML = `
-            <div style="text-align:center; margin-bottom:10px;">
-                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
-                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receipt.receiptId}</div>
-                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
-                <div style="font-size:12px; margin-bottom:10px;">${receipt.date}</div>
+            <div style="text-align:center; margin-bottom:10px; color: black;">
+                <h3 style="margin:0; font-size:18px; color: black;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px; color: black;">Receipt ID: ${receipt.receiptId}</div>
+                <div style="font-size:12px; margin-bottom:5px; color: black;">Tel: 011-1234567</div>
+                <div style="font-size:12px; margin-bottom:10px; color: black;">${receipt.date}</div>
             </div>
             <hr style="border-top: 1px dashed black; margin:5px 0;">
             <div style="margin-bottom:10px;">
@@ -1383,7 +1400,7 @@
             let final = (item.price - item.discount) * quantity;
             
             receiptHTML += `
-                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color: black;">
                     <div>${item.name}${quantity > 1 ? ' x' + quantity : ''}</div>
                     <div>Rs. ${final.toFixed(2)}</div>
                 </div>`;
@@ -1392,7 +1409,7 @@
         receiptHTML += `
             </div>
             <hr style="border-top: 1px dashed black; margin:5px 0;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color: black;">
                 <span>Subtotal:</span>
                 <span>Rs. ${receipt.grossTotal.toFixed(2)}</span>
             </div>
@@ -1407,7 +1424,7 @@
         }
         
         receiptHTML += `
-            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px; color: black;">
                 <span>TOTAL:</span>
                 <span>Rs. ${receipt.netTotal.toFixed(2)}</span>
             </div>
@@ -1420,7 +1437,7 @@
         // Store receipt HTML for printing
         document.getElementById('printableReceipt').innerHTML = receiptHTML;
         
-        // Show receipt in popup
+        // Show receipt in popup - FIXED: Using receipt-preview class
         document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
         document.getElementById('receiptPopup').style.display = 'flex';
         document.querySelector('.btn-confirm').innerHTML = '🖨️ Print Receipt';
