@@ -110,7 +110,7 @@
             display: flex;
         }
 
-        /* --- POS STYLES (Existing) --- */
+        /* --- POS STYLES --- */
         .inventory-section {
             flex: 2;
             background: var(--bg-primary);
@@ -135,7 +135,7 @@
             min-width: 340px;
         }
 
-        /* --- STOCK MANAGEMENT STYLES (New) --- */
+        /* --- STOCK MANAGEMENT STYLES --- */
         .stock-form-section {
             flex: 1;
             background: var(--bg-primary);
@@ -146,6 +146,7 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
+            overflow-y: auto;
         }
 
         .stock-history-section {
@@ -204,6 +205,12 @@
             border-color: var(--main-blue);
         }
 
+        /* Readonly inputs look different */
+        .form-input[readonly] {
+            background-color: var(--bg-secondary);
+            cursor: not-allowed;
+        }
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -237,6 +244,12 @@
         td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
         tr:hover { background: var(--bg-secondary); cursor: pointer; }
         .selected-row { background: rgba(57, 73, 171, 0.1) !important; border-left: 3px solid var(--main-blue); }
+
+        /* Low Stock Alert Style */
+        .low-stock-text {
+            color: var(--error-red) !important;
+            font-weight: bold;
+        }
 
         /* Popups */
         .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
@@ -344,16 +357,17 @@
 
 <div id="stock-view" class="view-section">
     <section class="stock-form-section">
-        <h2 style="margin-top: 0; color: var(--main-blue);">නව ස්ටොක් එකතු කරන්න</h2>
+        <h2 style="margin-top: 0; color: var(--main-blue);">ස්ටොක් / අලුත් අයිතම</h2>
         
         <div class="form-group">
             <label>භාණ්ඩයේ ID අංකය:</label>
-            <input type="number" id="stockItemId" class="form-input" placeholder="ID (උදා: 1)" onchange="fillItemName()">
+            <input type="number" id="stockItemId" class="form-input" placeholder="ID (උදා: 1 හෝ අලුත් අංකයක්)" oninput="fillItemName()">
+            <small style="color: #666;">* අලුත් ID එකක් නම් ඔබට අලුත් අයිතමයක් සෑදිය හැක.</small>
         </div>
         
         <div class="form-group">
             <label>භාණ්ඩයේ නම:</label>
-            <input type="text" id="stockItemName" class="form-input" placeholder="නම ස්වයංක්‍රීයව පෙන්වයි" disabled>
+            <input type="text" id="stockItemName" class="form-input" placeholder="භාණ්ඩයේ නම">
         </div>
 
         <div class="form-group">
@@ -362,13 +376,18 @@
         </div>
 
         <div class="form-group">
+            <label>විකුණුම් මිල (Selling Price):</label>
+            <input type="number" id="stockPrice" class="form-input" placeholder="පාරිභෝගික මිල (Rs)" min="0" step="0.01">
+            <small style="color: #666;">* නව අයිතමයක් සඳහා අනිවාර්යයි.</small>
+        </div>
+
+        <div class="form-group">
             <label>ඒකකයක ගැනුම් මිල (Cost Price):</label>
-            <input type="number" id="stockCost" class="form-input" placeholder="එක් අයිතමයක මිල (Rs)" min="0" step="0.01">
-            <small style="color: #666;">* විකල්ප: මෙය ඇතුළත් කළොත් Cost එක update වේ.</small>
+            <input type="number" id="stockCost" class="form-input" placeholder="අපට ගිය වියදම (Rs)" min="0" step="0.01">
         </div>
 
         <button class="btn btn-add-stock" onclick="addNewStock()">
-            <span class="btn-icon">📥</span> ස්ටොක් එකතු කරන්න (Add Stock)
+            <span class="btn-icon">📥</span> ස්ටොක් / අයිතමය එකතු කරන්න
         </button>
     </section>
 
@@ -438,7 +457,7 @@
 
     let inventory = [];
     let cart = [];
-    let stockHistory = []; // New Array for stock logs
+    let stockHistory = []; 
     let isLocked = true;
     let selectedId = null;
     let totalIncome = 0;
@@ -449,29 +468,27 @@
 
     // Initialize System
     function initialize() {
-        // Theme
         const savedTheme = localStorage.getItem('chandana_theme');
         if (savedTheme === 'dark') enableDarkMode();
 
-        // Inventory Data
         const savedInv = localStorage.getItem('chandana_db');
         if (savedInv) {
             inventory = JSON.parse(savedInv);
         } else {
+            // Default items
             for (let i = 1; i <= 200; i++) {
                 inventory.push({ id: i, name: "අයිතමය " + i, cost: 100, price: 150, stock: 50 });
             }
             saveToStorage();
         }
 
-        // Stock History Data
         const savedStock = localStorage.getItem('chandana_stock_history');
         if (savedStock) {
             stockHistory = JSON.parse(savedStock);
         }
 
         renderTable();
-        renderStockHistory(); // Load stock history
+        renderStockHistory();
     }
 
     function saveToStorage() {
@@ -481,45 +498,54 @@
 
     // --- Navigation System ---
     function switchView(viewName) {
-        // Hide all views
         document.getElementById('pos-view').classList.remove('active-view');
         document.getElementById('stock-view').classList.remove('active-view');
-        
-        // Deactivate tabs
         document.getElementById('tab-pos').classList.remove('active');
         document.getElementById('tab-stock').classList.remove('active');
 
-        // Show selected
         if (viewName === 'pos') {
             document.getElementById('pos-view').classList.add('active-view');
             document.getElementById('tab-pos').classList.add('active');
-            renderTable(); // Refresh inventory table
+            renderTable(); 
         } else {
             document.getElementById('stock-view').classList.add('active-view');
             document.getElementById('tab-stock').classList.add('active');
-            renderStockHistory(); // Refresh history
+            renderStockHistory();
         }
     }
 
-    // --- Stock Management Logic ---
+    // --- Stock Management Logic (Updated for New Items) ---
     
-    // Auto-fill item name when ID is typed
     function fillItemName() {
         const id = parseInt(document.getElementById('stockItemId').value);
         const item = inventory.find(i => i.id === id);
         const nameField = document.getElementById('stockItemName');
+        const priceField = document.getElementById('stockPrice');
+        const costField = document.getElementById('stockCost');
         
         if (item) {
+            // Existing item: Auto-fill and lock name slightly visually (but keep editable if needed)
             nameField.value = item.name;
+            priceField.value = item.price;
+            costField.value = item.cost;
         } else {
-            nameField.value = "සොයාගත නොහැක";
+            // New item: Clear fields to allow user to type
+            // Don't clear if user is typing a new name/price, only clear if they just changed ID
+            // Simple approach: if name field is empty or holds "Searching...", clear it
+            if(nameField.value === "සොයාගත නොහැක" || nameField.value.startsWith("අයිතමය")) {
+                nameField.value = "";
+                priceField.value = "";
+                costField.value = "";
+            }
         }
     }
 
     function addNewStock() {
         const id = parseInt(document.getElementById('stockItemId').value);
+        const name = document.getElementById('stockItemName').value.trim();
         const qty = parseInt(document.getElementById('stockQty').value);
-        const cost = parseFloat(document.getElementById('stockCost').value);
+        const cost = parseFloat(document.getElementById('stockCost').value) || 0;
+        const price = parseFloat(document.getElementById('stockPrice').value) || 0;
 
         if (!id || !qty || qty <= 0) {
             alert("කරුණාකර නිවැරදි ID එකක් සහ ප්‍රමාණයක් (Qty) ඇතුළත් කරන්න.");
@@ -527,37 +553,52 @@
         }
 
         let item = inventory.find(i => i.id === id);
-        if (!item) {
-            alert("මෙම ID එක සහිත භාණ්ඩයක් ඉන්වෙන්ටරියේ නැත.");
-            return;
+
+        if (item) {
+            // --- UPDATE EXISTING ITEM ---
+            item.stock += qty;
+            if (cost > 0) item.cost = cost; 
+            if (price > 0) item.price = price;
+            if (name) item.name = name; // Update name if user changed it
+            alert(`ස්ටොක් යාවත්කාලීන විය! නව ප්‍රමාණය: ${item.stock}`);
+        } else {
+            // --- ADD NEW ITEM ---
+            if (!name) return alert("නව අයිතමයක් සඳහා 'නම' ඇතුළත් කිරීම අනිවාර්යයි.");
+            if (!price) return alert("නව අයිතමයක් සඳහා 'විකුණුම් මිල' ඇතුළත් කිරීම අනිවාර්යයි.");
+            
+            const newItem = {
+                id: id,
+                name: name,
+                cost: cost, // Can be 0 if not entered
+                price: price,
+                stock: qty
+            };
+            inventory.push(newItem);
+            // Sort inventory by ID for tidiness (optional)
+            inventory.sort((a, b) => a.id - b.id);
+            alert(`නව අයිතමය සාර්ථකව ඇතුළත් කරන ලදී: ${name}`);
         }
 
-        // Update Inventory
-        item.stock += qty;
-        if (cost && cost > 0) {
-            item.cost = cost; // Update buying price if provided
-        }
-
-        // Add to History
+        // Add to History Log
         const log = {
-            date: new Date().toLocaleString('si-LK'), // Date & Time
-            itemId: item.id,
-            itemName: item.name,
+            date: new Date().toLocaleString('si-LK'),
+            itemId: id,
+            itemName: name || (item ? item.name : "Unknown"),
             qty: qty,
-            unitCost: cost || item.cost,
-            totalCost: qty * (cost || item.cost)
+            unitCost: cost || (item ? item.cost : 0),
+            totalCost: qty * (cost || (item ? item.cost : 0))
         };
-        stockHistory.unshift(log); // Add to top of list
+        stockHistory.unshift(log);
 
         // Clear Form
         document.getElementById('stockItemId').value = '';
         document.getElementById('stockItemName').value = '';
         document.getElementById('stockQty').value = '';
         document.getElementById('stockCost').value = '';
+        document.getElementById('stockPrice').value = '';
 
         saveToStorage();
         renderStockHistory();
-        alert("ස්ටොක් සාර්ථකව යාවත්කාලීන විය!");
     }
 
     function renderStockHistory() {
@@ -579,7 +620,6 @@
             `;
         }).join('');
 
-        // Update Summary Cards
         document.getElementById('totalStockInvestment').innerText = "Rs. " + totalInvestment.toFixed(2);
         document.getElementById('totalStockItemsAdded').innerText = totalItems;
     }
@@ -602,14 +642,19 @@
 
     function renderTable() {
         const body = document.getElementById('inventoryBody');
-        body.innerHTML = inventory.map(item => `
+        body.innerHTML = inventory.map(item => {
+            // Check for low stock (Less than 20)
+            const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
+            
+            return `
             <tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
                 <td onclick="openItemNamePopup(${item.id})">${item.name}</td>
                 <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
-                <td onclick="directEdit(${item.id}, 'stock')">${item.stock}</td>
+                <td class="${lowStockClass}" onclick="directEdit(${item.id}, 'stock')">${item.stock}</td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function selectRow(id) {
@@ -622,6 +667,9 @@
     function addToCart() {
         if (!selectedId) return alert("භාණ්ඩයක් තෝරාගන්න!");
         let item = inventory.find(i => i.id === selectedId);
+        // Warning if stock is 0
+        if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
+        
         cart.push({ ...item, discount: 0 });
         updateCartUI();
     }
@@ -667,11 +715,13 @@
         
         cart.forEach((c, i) => {
             let item = inventory.find(x => x.id === c.id);
-            if (item.stock > 0) item.stock--;
+            if (item) {
+                item.stock--; // Reduce stock
+            }
             let final = c.price - c.discount;
             gross += c.price; dis += c.discount; net += final;
             totalIncome += final;
-            totalProfit += (final - item.cost);
+            if(item) totalProfit += (final - item.cost);
 
             receiptHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
                 <div>${i+1}. ${c.name}</div>
@@ -706,7 +756,8 @@
         if (!itemToEdit) return;
         let val = document.getElementById('newItemName').value.trim();
         if (val) {
-            inventory.find(i => i.id === itemToEdit).name = val;
+            let item = inventory.find(i => i.id === itemToEdit);
+            if(item) item.name = val;
             saveToStorage(); renderTable();
             cart.forEach(c => { if(c.id === itemToEdit) c.name = val; });
             updateCartUI();
@@ -758,6 +809,7 @@
     function directEdit(id, field) {
         if (isLocked) return;
         let item = inventory.find(i => i.id === id);
+        if(!item) return;
         let val = prompt("නව අගය:", field==='price'?item[field].toFixed(2):item[field]);
         if (val !== null) {
             item[field] = parseFloat(val);
