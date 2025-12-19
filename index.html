@@ -70,10 +70,11 @@
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border-color);
             padding: 0 20px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
-            padding: 15px 25px;
+            padding: 15px 20px;
             border: none;
             background: none;
             font-size: 16px;
@@ -83,6 +84,7 @@
             border-bottom: 3px solid transparent;
             opacity: 0.6;
             transition: all 0.3s;
+            white-space: nowrap;
         }
 
         .tab-btn:hover {
@@ -159,7 +161,32 @@
             display: flex;
             flex-direction: column;
         }
-        
+
+        /* --- HISTORY STYLES --- */
+        .history-search-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            overflow-y: auto;
+        }
+
+        .history-results-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
         /* --- SETTINGS STYLES (Responsive) --- */
         .settings-container {
             flex: 1;
@@ -204,10 +231,11 @@
             font-weight: bold;
         }
 
-        .stock-summary-cards {
+        .stock-summary-cards, .history-summary-cards {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .summary-card {
@@ -217,10 +245,56 @@
             border-radius: 8px;
             border-left: 4px solid var(--warning-orange);
             text-align: center;
+            min-width: 200px;
         }
         
         .summary-card h4 { margin: 0; font-size: 14px; opacity: 0.8; }
         .summary-card div { font-size: 24px; font-weight: bold; margin-top: 5px; color: var(--main-blue); }
+
+        .receipt-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .receipt-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .receipt-id {
+            font-weight: bold;
+            color: var(--main-blue);
+            font-size: 16px;
+        }
+
+        .receipt-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .receipt-items {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-total {
+            font-weight: bold;
+            color: var(--success-green);
+            font-size: 16px;
+        }
 
         /* Common Elements */
         .search-bar, .form-input, select {
@@ -263,7 +337,9 @@
         .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
         .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
         .btn-print { background: #607d8b; color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; }
-        .btn-undo { background: #e53935; color: white; margin-left: auto; } /* Undo Button Style */
+        .btn-undo { background: #e53935; color: white; margin-left: auto; }
+        .btn-search { background: var(--main-blue); color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 5px; }
+        .btn-reprint { background: var(--warning-orange); color: white; padding: 8px 15px; font-size: 14px; margin-top: 5px; }
 
         /* Table */
         .scroll-box {
@@ -394,9 +470,11 @@
 
         @media (max-width: 768px) {
             .view-section { flex-direction: column; overflow-y: auto; }
-            .billing-section, .stock-form-section, .stock-history-section, .settings-container { min-width: 100%; }
+            .billing-section, .stock-form-section, .stock-history-section, .settings-container, .history-search-section, .history-results-section { min-width: 100%; }
             .settings-layout { flex-direction: column; }
             .settings-card { width: 100%; min-width: auto; }
+            .nav-tabs { padding: 0 10px; }
+            .tab-btn { padding: 12px 15px; font-size: 14px; }
         }
     </style>
 </head>
@@ -413,6 +491,7 @@
 <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchView('pos')" id="tab-pos">POS / Billing</button>
     <button class="tab-btn" onclick="switchView('stock')" id="tab-stock">Stock Management</button>
+    <button class="tab-btn" onclick="switchView('history')" id="tab-history">History / Receipts</button>
     <button class="tab-btn" onclick="switchView('settings')" id="tab-settings">Settings / Devices</button>
 </div>
 
@@ -433,7 +512,7 @@
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
-                    </tbody>
+                </tbody>
             </table>
         </div>
         <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
@@ -540,8 +619,68 @@
                     </tr>
                 </thead>
                 <tbody id="stockHistoryBody">
-                    </tbody>
+                </tbody>
             </table>
+        </div>
+    </section>
+</div>
+
+<div id="history-view" class="view-section">
+    <section class="history-search-section">
+        <h2 style="margin-top: 0; color: var(--main-blue);">රිසිට් ඉතිහාසය සෙවීම</h2>
+        
+        <div class="form-group">
+            <label>රිසිට් අංකය (Receipt ID):</label>
+            <input type="text" id="receiptIdSearch" class="form-input" placeholder="රිසිට් අංකය ඇතුළත් කරන්න">
+            <small style="color: #666;">රිසිට් අංකය ඇතුළත් කර එක් රිසිට් එකක් සොයන්න</small>
+        </div>
+
+        <div class="form-group">
+            <label>දිනය (Date):</label>
+            <input type="date" id="dateSearch" class="form-input">
+            <small style="color: #666;">නිශ්චිත දිනයක රිසිට් සොයන්න</small>
+        </div>
+
+        <div class="form-group">
+            <label>දින පරාසය (Date Range):</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                <input type="date" id="dateFrom" class="form-input" style="flex: 1;">
+                <input type="date" id="dateTo" class="form-input" style="flex: 1;">
+            </div>
+            <small style="color: #666;">දින පරාසයක රිසිට් සොයන්න</small>
+        </div>
+
+        <button class="btn btn-search" onclick="searchReceipts()">
+            <span class="btn-icon">🔍</span> රිසිට් සොයන්න
+        </button>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <h4>මෑත ගනුදෙනු</h4>
+            <div class="scroll-box" style="height: 200px;">
+                <div id="recentReceiptsList"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="history-results-section">
+        <div class="history-summary-cards">
+            <div class="summary-card">
+                <h4>මුළු රිසිට් ගණන</h4>
+                <div id="totalReceiptsCount">0</div>
+            </div>
+            <div class="summary-card">
+                <h4>මුළු ආදායම</h4>
+                <div id="totalReceiptsAmount">0.00</div>
+            </div>
+            <div class="summary-card">
+                <h4>අද දින ආදායම</h4>
+                <div id="todayReceiptsAmount">0.00</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 10px;">සොයාගත් රිසිට්</h3>
+        <div class="scroll-box">
+            <div id="receiptsResults" style="padding: 10px;"></div>
         </div>
     </section>
 </div>
@@ -645,6 +784,7 @@
     let inventory = [];
     let cart = [];
     let stockHistory = []; 
+    let salesHistory = []; // New: Store all receipts
     let isLocked = true; // System starts locked for editing
     let selectedId = null;
     let totalIncome = 0;
@@ -655,6 +795,7 @@
     let paperSize = '80mm';
     let pinAttempts = 0;
     const MAX_PIN_ATTEMPTS = 3;
+    let receiptCounter = 1000; // Starting receipt number
 
     function initialize() {
         const savedTheme = localStorage.getItem('chandana_theme');
@@ -682,6 +823,16 @@
             stockHistory = JSON.parse(savedStock);
         }
 
+        // Load sales history (receipts)
+        const savedSales = localStorage.getItem('chandana_sales_history');
+        if (savedSales) {
+            salesHistory = JSON.parse(savedSales);
+            // Find the highest receipt ID
+            if (salesHistory.length > 0) {
+                receiptCounter = Math.max(...salesHistory.map(r => r.receiptId)) + 1;
+            }
+        }
+
         const savedPaper = localStorage.getItem('chandana_paper_size');
         if (savedPaper) {
             paperSize = savedPaper;
@@ -700,6 +851,9 @@
         renderTable();
         renderStockHistory();
         
+        // Load recent receipts
+        loadRecentReceipts();
+        
         // Auto focus on POS search on load
         if(document.getElementById('pos-view').classList.contains('active-view')) {
             document.getElementById('searchInput').focus();
@@ -709,6 +863,7 @@
     function saveToStorage() {
         localStorage.setItem('chandana_db', JSON.stringify(inventory));
         localStorage.setItem('chandana_stock_history', JSON.stringify(stockHistory));
+        localStorage.setItem('chandana_sales_history', JSON.stringify(salesHistory));
         localStorage.setItem('chandana_paper_size', paperSize);
         
         // Save income/profit stats
@@ -735,6 +890,9 @@
         } else if (viewName === 'stock') {
             renderStockHistory();
             document.getElementById('stockItemId').focus(); // Auto focus for stock scanning
+        } else if (viewName === 'history') {
+            loadRecentReceipts();
+            updateReceiptStats();
         }
     }
 
@@ -978,11 +1136,24 @@
         
         let gross = 0, dis = 0, net = 0;
         let date = new Date().toLocaleString('si-LK');
+        let receiptId = receiptCounter++;
+        
+        // Create receipt object
+        let receipt = {
+            receiptId: receiptId,
+            date: date,
+            items: [...cart],
+            grossTotal: gross,
+            discountTotal: dis,
+            netTotal: net,
+            paymentMethod: "Cash"
+        };
         
         // Build receipt HTML for popup preview AND printable receipt
         let receiptHTML = `
             <div style="text-align:center; margin-bottom:10px;">
                 <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receiptId}</div>
                 <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
                 <div style="font-size:12px; margin-bottom:10px;">${date}</div>
             </div>
@@ -1046,6 +1217,14 @@
             </div>
         `;
         
+        // Update receipt object with final totals
+        receipt.grossTotal = gross;
+        receipt.discountTotal = dis;
+        receipt.netTotal = net;
+        
+        // Add to sales history
+        salesHistory.unshift(receipt);
+        
         // Update stats display
         updateStatsDisplay();
         
@@ -1065,6 +1244,191 @@
 
     function closeReceiptPopup() { 
         document.getElementById('receiptPopup').style.display = 'none'; 
+    }
+
+    /* --- HISTORY FUNCTIONS --- */
+
+    function loadRecentReceipts() {
+        const recentList = document.getElementById('recentReceiptsList');
+        const recentReceipts = salesHistory.slice(0, 10); // Last 10 receipts
+        
+        if (recentReceipts.length === 0) {
+            recentList.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No recent receipts</p>';
+            return;
+        }
+        
+        recentList.innerHTML = recentReceipts.map(receipt => `
+            <div class="receipt-card" onclick="viewReceiptDetails(${receipt.receiptId})" style="cursor:pointer; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:bold;">Receipt #${receipt.receiptId}</div>
+                        <div style="font-size:12px; color:#666;">${receipt.date}</div>
+                    </div>
+                    <div style="font-weight:bold; color:var(--success-green);">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateReceiptStats() {
+        const totalReceipts = salesHistory.length;
+        const totalAmount = salesHistory.reduce((sum, r) => sum + r.netTotal, 0);
+        
+        // Calculate today's total
+        const today = new Date().toLocaleDateString('si-LK');
+        const todayReceipts = salesHistory.filter(r => r.date.includes(today.split(',')[0]));
+        const todayAmount = todayReceipts.reduce((sum, r) => sum + r.netTotal, 0);
+        
+        document.getElementById('totalReceiptsCount').innerText = totalReceipts;
+        document.getElementById('totalReceiptsAmount').innerText = "Rs. " + totalAmount.toFixed(2);
+        document.getElementById('todayReceiptsAmount').innerText = "Rs. " + todayAmount.toFixed(2);
+    }
+
+    function searchReceipts() {
+        const receiptId = document.getElementById('receiptIdSearch').value.trim();
+        const date = document.getElementById('dateSearch').value;
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        let filteredReceipts = [...salesHistory];
+        
+        // Filter by receipt ID
+        if (receiptId) {
+            filteredReceipts = filteredReceipts.filter(r => r.receiptId.toString().includes(receiptId));
+        }
+        
+        // Filter by specific date
+        if (date) {
+            const searchDate = new Date(date).toLocaleDateString('si-LK');
+            filteredReceipts = filteredReceipts.filter(r => {
+                const receiptDate = new Date(r.date.split(',')[0]).toLocaleDateString('si-LK');
+                return receiptDate === searchDate;
+            });
+        }
+        
+        // Filter by date range
+        if (dateFrom && dateTo) {
+            const from = new Date(dateFrom).getTime();
+            const to = new Date(dateTo).getTime();
+            
+            filteredReceipts = filteredReceipts.filter(r => {
+                const receiptDate = new Date(r.date.split(',')[0]).getTime();
+                return receiptDate >= from && receiptDate <= to;
+            });
+        }
+        
+        displayReceiptsResults(filteredReceipts);
+    }
+
+    function displayReceiptsResults(receipts) {
+        const resultsDiv = document.getElementById('receiptsResults');
+        
+        if (receipts.length === 0) {
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts found</p>';
+            return;
+        }
+        
+        resultsDiv.innerHTML = receipts.map(receipt => `
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <div class="receipt-id">Receipt #${receipt.receiptId}</div>
+                    <div class="receipt-date">${receipt.date}</div>
+                </div>
+                
+                <div class="receipt-items">
+                    ${receipt.items.map((item, index) => `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+                            <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
+                            <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
+                    <div>
+                        <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                        ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                    </div>
+                    <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                </div>
+                
+                <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
+                    <span class="btn-icon">🖨️</span> Print Again
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function viewReceiptDetails(receiptId) {
+        const receipt = salesHistory.find(r => r.receiptId === receiptId);
+        if (!receipt) {
+            alert("Receipt not found!");
+            return;
+        }
+        
+        // Build receipt HTML for viewing
+        let receiptHTML = `
+            <div style="text-align:center; margin-bottom:10px;">
+                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receipt.receiptId}</div>
+                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
+                <div style="font-size:12px; margin-bottom:10px;">${receipt.date}</div>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="margin-bottom:10px;">
+        `;
+        
+        receipt.items.forEach((item, i) => {
+            let quantity = item.quantity || 1;
+            let final = (item.price - item.discount) * quantity;
+            
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                    <div>${item.name}${quantity > 1 ? ' x' + quantity : ''}</div>
+                    <div>Rs. ${final.toFixed(2)}</div>
+                </div>`;
+        });
+
+        receiptHTML += `
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                <span>Subtotal:</span>
+                <span>Rs. ${receipt.grossTotal.toFixed(2)}</span>
+            </div>
+        `;
+        
+        if (receipt.discountTotal > 0) {
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
+                    <span>Discount:</span>
+                    <span>-Rs. ${receipt.discountTotal.toFixed(2)}</span>
+                </div>`;
+        }
+        
+        receiptHTML += `
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
+                <span>TOTAL:</span>
+                <span>Rs. ${receipt.netTotal.toFixed(2)}</span>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:11px; color:#666;">
+                Thank You!<br>Come Again!
+            </div>
+        `;
+        
+        // Store receipt HTML for printing
+        document.getElementById('printableReceipt').innerHTML = receiptHTML;
+        
+        // Show receipt in popup
+        document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
+        document.getElementById('receiptPopup').style.display = 'flex';
+        document.querySelector('.btn-confirm').innerHTML = '🖨️ Print Receipt';
+        document.querySelector('.btn-confirm').onclick = () => printReceipt();
+    }
+
+    function reprintReceipt(receiptId) {
+        viewReceiptDetails(receiptId);
     }
 
     /* --- PRINT FUNCTIONS --- */
