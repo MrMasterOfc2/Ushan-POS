@@ -358,112 +358,103 @@
 
         .low-stock-text { color: var(--error-red) !important; font-weight: bold; }
 
-        /* Cart Item Styling */
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
+        /* Popups */
+        .popup-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(3px); 
         }
-        
-        .cart-item:hover {
-            background-color: rgba(0,0,0,0.02);
+        .popup-content { 
+            background: var(--bg-primary); 
+            padding: 30px; 
+            border-radius: 15px; 
+            width: 400px; 
+            max-width: 90%; 
+            color: var(--text-primary); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-top: 5px solid var(--main-blue);
         }
-        
-        .cart-item-info {
-            flex: 1;
-        }
-        
-        .cart-item-name {
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        
-        .cart-item-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-        
-        .cart-item-qty {
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .cart-item-price {
-            font-weight: bold;
-            text-align: right;
-        }
-        
-        .original-price-strike { 
-            text-decoration: line-through; 
-            color: #888; 
-            font-size: 12px; 
-            display: block; 
-            margin-bottom: 2px;
-        }
-        
-        .discount-label { 
-            color: var(--discount-color); 
-            font-size: 12px; 
-            font-weight: bold; 
-            display: block; 
-        }
-        
-        .remove-btn { 
-            color: var(--error-red); 
-            cursor: pointer; 
-            margin-left: 15px;
-            font-size: 18px;
-            padding: 5px 10px;
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-        
-        .remove-btn:hover {
-            background-color: rgba(244, 67, 54, 0.1);
-            transform: scale(1.1);
-        }
-        
-        .qty-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 5px;
-        }
-        
-        .qty-btn {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            background: var(--main-blue);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-        
-        .qty-btn:hover {
-            background: var(--success-green);
-        }
-        
-        .qty-value {
-            font-weight: bold;
-            min-width: 30px;
+        .popup-content.security-popup {
+            border-top: 5px solid #ff9800;
             text-align: center;
         }
+        .popup-input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 1px solid var(--border-color); 
+            border-radius: 5px; 
+            background: var(--bg-primary); 
+            color: var(--text-primary); 
+            box-sizing: border-box; 
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        .popup-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-confirm { background: var(--success-green); color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-cancel { background: #757575; color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
 
+        /* PIN Popup Specific */
+        .security-icon {
+            font-size: 48px;
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        .security-title {
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+        .security-subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .pin-input-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .pin-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+        .pin-dot.active {
+            background: var(--main-blue);
+            transform: scale(1.2);
+        }
+        .pin-error {
+            color: var(--error-red);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Cart Styling */
+        #cartList li { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .original-price-strike { text-decoration: line-through; color: #888; font-size: 12px; display: block; }
+        .discount-label { color: var(--discount-color); font-size: 12px; font-weight: bold; display: block; }
         .bill-summary { padding: 15px 0; border-top: 2px dashed var(--border-color); margin-top: 10px; }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
         .summary-row.total { font-size: 22px; font-weight: bold; color: var(--main-blue); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .summary-row.discount-row { color: var(--discount-color); }
+        .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
 
         .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
@@ -583,7 +574,7 @@
         </div>
         
         <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none;">
-            <div id="cartList"></div>
+            <ul id="cartList" style="list-style: none; padding: 0;"></ul>
         </div>
 
         <div style="margin-top: 10px;">
@@ -1138,29 +1129,9 @@
         cartContainer.scrollTop = cartContainer.scrollHeight;
     }
 
-    /* =========================
-       🔥 NEW: DELETE INDIVIDUAL ITEM FROM CART
-       ========================= */
     function removeFromCart(index) {
-        if (confirm("මෙම අයිතමය cart එකෙන් ඉවත් කරන්නද?")) {
+        if (confirm("ඉවත් කරන්නද?")) {
             cart.splice(index, 1);
-            updateCartUI();
-        }
-    }
-    
-    /* =========================
-       🔥 NEW: UPDATE ITEM QUANTITY
-       ========================= */
-    function updateCartQuantity(index, change) {
-        if (cart[index]) {
-            const newQty = (cart[index].quantity || 1) + change;
-            if (newQty < 1) {
-                if (confirm("ප්‍රමාණය 0 කි. අයිතමය ඉවත් කරන්නද?")) {
-                    removeFromCart(index);
-                }
-                return;
-            }
-            cart[index].quantity = newQty;
             updateCartUI();
         }
     }
@@ -1178,47 +1149,19 @@
         const list = document.getElementById('cartList');
         let grossTotal = 0, totalDiscount = 0;
         
-        if (cart.length === 0) {
-            list.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Cart is empty.<br>Scan or select items to add.</div>';
-            document.getElementById('subTotalDisplay').innerText = "0.00";
-            document.getElementById('discountRow').style.display = 'none';
-            document.getElementById('grandTotal').innerText = "0.00";
-            return;
-        }
-        
         list.innerHTML = cart.map((item, idx) => {
             let quantity = item.quantity || 1;
-            let itemTotal = item.price * quantity;
-            let discountTotal = item.discount * quantity;
-            let finalPrice = itemTotal - discountTotal;
-            
-            grossTotal += itemTotal;
-            totalDiscount += discountTotal;
-            
-            return `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${idx+1}. ${item.name}</div>
-                        <div class="cart-item-details">
-                            <div class="cart-item-qty">
-                                <div class="qty-controls">
-                                    <button class="qty-btn" onclick="updateCartQuantity(${idx}, -1)">-</button>
-                                    <span class="qty-value">${quantity}</span>
-                                    <button class="qty-btn" onclick="updateCartQuantity(${idx}, 1)">+</button>
-                                </div>
-                            </div>
-                            <div class="cart-item-price">
-                                ${item.discount > 0 ? `
-                                    <span class="original-price-strike">Rs. ${itemTotal.toFixed(2)}</span>
-                                    <span class="discount-label">-Rs. ${discountTotal.toFixed(2)}</span>
-                                ` : ''}
-                                <b>Rs. ${finalPrice.toFixed(2)}</b>
-                            </div>
-                        </div>
+            let finalPrice = (item.price - item.discount) * quantity;
+            grossTotal += item.price * quantity;
+            totalDiscount += item.discount * quantity;
+            return `<li>
+                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${quantity > 1 ? 'x' + quantity : ''}</div>
+                    <div style="text-align:right">
+                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * quantity).toFixed(2)}</span><span class="discount-label">-${(item.discount * quantity).toFixed(2)}</span>` : ''}
+                        <b>Rs. ${finalPrice.toFixed(2)}</b>
                     </div>
-                    <div class="remove-btn" onclick="removeFromCart(${idx})" title="Remove item from cart">✕</div>
-                </div>
-            `;
+                    <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
+                </li>`;
         }).join('');
         
         let netTotal = grossTotal - totalDiscount;
@@ -1775,3 +1718,5 @@
 </script>
 </body>
 </html>
+
+
