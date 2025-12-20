@@ -2,240 +2,1668 @@
 <html lang="si">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHANDANA POS SYSTEM</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a237e">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHANDANA STORES - PRO POS & STOCK</title>
     <style>
-        /* මීට පෙර දුන් සියලුම CSS මෝස්තර මෙහි අඩංගු වේ */
-        :root { --main-blue: #1a237e; --success: #2e7d32; --danger: #c62828; --light: #f5f6fa; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        header { background: var(--main-blue); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .nav-tabs { background: #e8eaf6; display: flex; padding: 5px 20px; border-bottom: 2px solid #ddd; }
-        .tab-btn { padding: 12px 20px; border: none; background: #c5cae9; cursor: pointer; border-radius: 5px 5px 0 0; font-weight: bold; margin-right: 5px; }
-        .tab-btn.active { background: white; border: 1px solid #ddd; border-bottom: 3px solid white; }
-
-        .page { display: none; flex: 1; padding: 15px; gap: 15px; overflow: hidden; }
-        .page.active { display: flex; }
-
-        /* Responsive Design: Mobile සඳහා ස්වයංක්‍රීයව වෙනස් වීම */
-        @media (max-width: 768px) {
-            .page.active { flex-direction: column; overflow-y: auto; }
-            .billing-section { min-width: 100%; height: auto; }
+        /* --- 1. මෝස්තර (CSS) --- */
+        :root {
+            --main-blue: #1a237e;
+            --success-green: #2e7d32;
+            --error-red: #c62828;
+            --warning-orange: #ff9800;
+            --light-gray: #f5f6fa;
+            --text-primary: #000000;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f6fa;
+            --border-color: #ddd;
+            --shadow: rgba(0,0,0,0.1);
+            --discount-color: #ff5722;
         }
 
-        /* Tables & Inputs */
-        .inventory-section { flex: 2; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .billing-section { flex: 1; background: white; border-radius: 10px; display: flex; flex-direction: column; padding: 15px; border-left: 5px solid var(--main-blue); }
-        .scroll-box { flex: 1; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; }
+        .dark-mode {
+            --main-blue: #3949ab;
+            --success-green: #4caf50;
+            --error-red: #ef5350;
+            --warning-orange: #ffb74d;
+            --light-gray: #1e1e1e;
+            --text-primary: #ffffff;
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --border-color: #333;
+            --shadow: rgba(255,255,255,0.1);
+            --discount-color: #ff8a65;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            background: var(--main-blue);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 15px 20px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            opacity: 0.6;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            opacity: 1;
+            background: var(--bg-secondary);
+        }
+
+        .tab-btn.active {
+            border-bottom-color: var(--main-blue);
+            color: var(--main-blue);
+            opacity: 1;
+        }
+
+        /* View Container */
+        .view-section {
+            display: none; /* Hidden by default */
+            flex: 1;
+            overflow: hidden;
+            padding: 10px;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .view-section.active-view {
+            display: flex;
+        }
+
+        /* --- POS STYLES --- */
+        .inventory-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .billing-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-left: 5px solid var(--main-blue);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            min-width: 340px;
+        }
+
+        /* --- STOCK MANAGEMENT STYLES --- */
+        .stock-form-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            overflow-y: auto;
+        }
+
+        .stock-history-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HISTORY STYLES --- */
+        .history-search-section {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            overflow-y: auto;
+        }
+
+        .history-results-section {
+            flex: 2;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- SETTINGS STYLES (Responsive) --- */
+        .settings-container {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px var(--shadow);
+            overflow-y: auto;
+        }
+
+        .settings-layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap; 
+        }
+
+        .settings-card {
+            flex: 1;
+            min-width: 300px; 
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .settings-card.info-card {
+            background: var(--bg-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stock-summary-cards, .history-summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-card {
+            flex: 1;
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning-orange);
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .summary-card h4 { margin: 0; font-size: 14px; opacity: 0.8; }
+        .summary-card div { font-size: 24px; font-weight: bold; margin-top: 5px; color: var(--main-blue); }
+
+        .receipt-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .receipt-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .receipt-id {
+            font-weight: bold;
+            color: var(--main-blue);
+            font-size: 16px;
+        }
+
+        .receipt-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .receipt-items {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .receipt-total {
+            font-weight: bold;
+            color: var(--success-green);
+            font-size: 16px;
+        }
+
+        /* Common Elements */
+        .search-bar, .form-input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .search-bar:focus {
+            outline: none;
+            border-color: var(--main-blue);
+        }
+
+        .form-input[readonly] {
+            background-color: var(--bg-secondary);
+            cursor: not-allowed;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+        
+        .btn-lock { background: #ff9800; color: white; }
+        .btn-unlock { background: #4caf50; color: white; }
+        .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
+        .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
+        .btn-print { background: #607d8b; color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; }
+        .btn-undo { background: #e53935; color: white; margin-left: auto; }
+        .btn-search { background: var(--main-blue); color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 5px; }
+        .btn-reprint { background: var(--warning-orange); color: white; padding: 8px 15px; font-size: 14px; margin-top: 5px; }
+
+        /* Table */
+        .scroll-box {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--bg-primary);
+        }
+
         table { width: 100%; border-collapse: collapse; }
-        th { background: #eee; padding: 12px; position: sticky; top: 0; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        th { background: var(--bg-secondary); padding: 12px; position: sticky; top: 0; text-align: left; border-bottom: 2px solid var(--border-color); color: var(--text-primary); }
+        td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        tr:hover { background: var(--bg-secondary); cursor: pointer; }
+        .selected-row { background: rgba(57, 73, 171, 0.1) !important; border-left: 3px solid var(--main-blue); }
+
+        .low-stock-text { color: var(--error-red) !important; font-weight: bold; }
+
+        /* Popups */
+        .popup-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 1000; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(3px); 
+        }
+        .popup-content { 
+            background: var(--bg-primary); 
+            padding: 30px; 
+            border-radius: 15px; 
+            width: 400px; 
+            max-width: 90%; 
+            color: var(--text-primary); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-top: 5px solid var(--main-blue);
+        }
+        .popup-content.security-popup {
+            border-top: 5px solid #ff9800;
+            text-align: center;
+        }
+        .popup-input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 1px solid var(--border-color); 
+            border-radius: 5px; 
+            background: var(--bg-primary); 
+            color: var(--text-primary); 
+            box-sizing: border-box; 
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        .popup-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-confirm { background: var(--success-green); color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-cancel { background: #757575; color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
+
+        /* PIN Popup Specific */
+        .security-icon {
+            font-size: 48px;
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        .security-title {
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+        .security-subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .pin-input-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .pin-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+        .pin-dot.active {
+            background: var(--main-blue);
+            transform: scale(1.2);
+        }
+        .pin-error {
+            color: var(--error-red);
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Cart Styling */
+        #cartList li { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .original-price-strike { text-decoration: line-through; color: #888; font-size: 12px; display: block; }
+        .discount-label { color: var(--discount-color); font-size: 12px; font-weight: bold; display: block; }
+        .bill-summary { padding: 15px 0; border-top: 2px dashed var(--border-color); margin-top: 10px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+        .summary-row.total { font-size: 22px; font-weight: bold; color: var(--main-blue); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        .summary-row.discount-row { color: var(--discount-color); }
+        .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
+
+        .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
+        .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printableReceipt, #printableReceipt * { visibility: visible; }
+            #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; color: black; background: white; font-family: 'Courier New', Courier, monospace; }
+            .popup-overlay, header, .nav-tabs, .btn { display: none !important; }
+        }
+
+        #printableReceipt { display: none; }
+
+        /* FIXED: Receipt preview always shows in light mode */
+        .receipt-preview {
+            background: white !important;
+            color: black !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .view-section { flex-direction: column; overflow-y: auto; }
+            .billing-section, .stock-form-section, .stock-history-section, .settings-container, .history-search-section, .history-results-section { min-width: 100%; }
+            .settings-layout { flex-direction: column; }
+            .settings-card { width: 100%; min-width: auto; }
+            .nav-tabs { padding: 0 10px; }
+            .tab-btn { padding: 12px 15px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 22px; font-weight: bold;">CHANDANA STORES</div>
-    <div id="stats" style="color: #ccff90;">ආදායම: 0.00 | ලාභය: 0.00</div>
+    <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
+    <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">🌙</button>
+        <div class="stats-display" id="stats">ආදායම: 0.00 | ලාභය: 0.00</div>
+    </div>
 </header>
 
-<nav class="nav-tabs">
-    <button class="tab-btn active" onclick="showPage('sales-page', this)">විකුණුම් (Sales)</button>
-    <button class="tab-btn" onclick="showPage('stock-page', this)">ස්ටොක් සහ වාර්තා</button>
-</nav>
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchView('pos')" id="tab-pos">POS / Billing</button>
+    <button class="tab-btn" onclick="switchView('stock')" id="tab-stock">Stock Management</button>
+    <button class="tab-btn" onclick="switchView('history')" id="tab-history">History / Receipts</button>
+    <button class="tab-btn" onclick="switchView('settings')" id="tab-settings">Settings / Devices</button>
+</div>
 
-<div id="sales-page" class="page active">
+<div id="pos-view" class="view-section active-view">
     <section class="inventory-section">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="text" id="searchInput" style="flex:1; padding:12px; font-size:16px;" placeholder="භාණ්ඩය සොයන්න හෝ Scan කරන්න..." onkeyup="searchItem()">
-            <button id="lockBtn" class="btn" style="background:#ff9800;" onclick="handleSecurity()">🔒 Unlock</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+            <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Scan Barcode or Type Name..." onkeyup="handleSearchInput(event)">
         </div>
+
         <div class="scroll-box">
             <table>
-                <thead><tr><th>ID</th><th>නම</th><th>මිල</th><th>ස්ටොක්</th></tr></thead>
-                <tbody id="inventoryBody"></tbody>
+                <thead>
+                    <tr>
+                        <th>ID / Barcode</th>
+                        <th>භාණ්ඩයේ නම</th>
+                        <th>මිල</th>
+                        <th>ස්ටොක්</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                </tbody>
             </table>
         </div>
-        <button class="btn" style="background: var(--main-blue); margin-top: 15px; font-size:16px;" onclick="addToCart()">කාර්ට් එකට දාන්න (+)</button>
+        <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
+            <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න (Select & Add)
+        </button>
     </section>
 
     <section class="billing-section">
-        <h3 style="margin-top:0;">වත්මන් බිල</h3>
-        <div class="scroll-box"><ul id="cartList" style="list-style:none; padding:0;"></ul></div>
-        <div style="font-size: 24px; font-weight: bold; color: var(--danger); padding: 10px 0;">එකතුව: <span id="grandTotal">0.00</span></div>
-        <button class="btn" style="background:var(--success); width:100%; font-size:20px; padding:15px;" onclick="checkout()">බිල් කරන්න (PAY)</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin-top: 0;">වත්මන් බිල</h2>
+            <button class="btn btn-undo" onclick="undoLastItem()" title="Remove last scanned item">
+                ↩ Undo Last
+            </button>
+        </div>
+        
+        <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none;">
+            <ul id="cartList" style="list-style: none; padding: 0;"></ul>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <button class="btn" style="background: #607d8b; color: white; width: 100%; margin-bottom: 5px; border-color: #546e7a;" onclick="showDiscountPopup()">
+                <span class="btn-icon">💰</span> වට්ටම් (Discount)
+            </button>
+            
+            <div id="billSummaryArea" class="bill-summary">
+                <div class="summary-row">
+                    <span>උප එකතුව (Subtotal):</span>
+                    <span id="subTotalDisplay">0.00</span>
+                </div>
+                <div class="summary-row discount-row" id="discountRow" style="display: none;">
+                    <span>වට්ටම් (Discount):</span>
+                    <span id="discountDisplay">-0.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>එකතුව (Net Total):</span>
+                    <span id="grandTotal">0.00</span>
+                </div>
+            </div>
+
+            <button class="btn btn-pay" onclick="checkout()">
+                <span class="btn-icon">💳</span> ගෙවීම අවසන් කරන්න (PAY)
+            </button>
+        </div>
     </section>
 </div>
 
-<div id="stock-page" class="page" style="flex-direction: column; overflow-y: auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
-            <p>අද දින ලාභය</p><h2 id="todayProfit" style="color:var(--success)">0.00</h2>
+<div id="stock-view" class="view-section">
+    <section class="stock-form-section">
+        <h2 style="margin-top: 0; color: var(--main-blue);">ස්ටොක් / අලුත් අයිතම</h2>
+        
+        <div class="form-group">
+            <label>භාණ්ඩයේ ID / Barcode:</label>
+            <input type="number" id="stockItemId" class="form-input" placeholder="Scan Barcode here..." onkeyup="handleStockInput(event)">
+            <small style="color: #666;">* Barcode එක Scan කරන්න හෝ ID එක Type කර Enter ඔබන්න.</small>
         </div>
-        <div style="background:white; padding:20px; border-radius:10px; text-align:center; border:1px solid #ddd;">
-            <p>මුළු ස්ටොක් වියදම</p><h2 id="totalStockCost" style="color:var(--danger)">0.00</h2>
+        
+        <div class="form-group">
+            <label>භාණ්ඩයේ නම:</label>
+            <input type="text" id="stockItemName" class="form-input" placeholder="භාණ්ඩයේ නම">
         </div>
-    </div>
 
-    <div style="background:white; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd;">
-        <h3>අලුත් ස්ටොක් ඇතුළත් කිරීම</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:10px;">
-            <input type="text" id="stName" style="padding:10px; flex:1;" placeholder="භාණ්ඩයේ නම">
-            <input type="number" id="stCost" style="padding:10px; width:120px;" placeholder="ගැනුම් මිල">
-            <input type="number" id="stQty" style="padding:10px; width:100px;" placeholder="ප්‍රමාණය">
-            <button class="btn" style="background:var(--success);" onclick="addNewStock()">සේව් කරන්න</button>
+        <div class="form-group">
+            <label>එකතු කරන ප්‍රමාණය (Qty):</label>
+            <input type="number" id="stockQty" class="form-input" placeholder="ප්‍රමාණය" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>විකුණුම් මිල (Selling Price):</label>
+            <input type="number" id="stockPrice" class="form-input" placeholder="පාරිභෝගික මිල (Rs)" min="0" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label>ඒකකයක ගැනුම් මිල (Cost Price):</label>
+            <input type="number" id="stockCost" class="form-input" placeholder="අපට ගිය වියදම (Rs)" min="0" step="0.01">
+        </div>
+
+        <button class="btn btn-add-stock" onclick="addNewStock()">
+            <span class="btn-icon">📥</span> ස්ටොක් / අයිතමය එකතු කරන්න
+        </button>
+    </section>
+
+    <section class="stock-history-section">
+        <div class="stock-summary-cards">
+            <div class="summary-card">
+                <h4>ස්ටොක් සඳහා මුළු වියදම</h4>
+                <div id="totalStockInvestment">0.00</div>
+            </div>
+            <div class="summary-card">
+                <h4>එකතු කළ මුළු අයිතම ගණන</h4>
+                <div id="totalStockItemsAdded">0</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 10px;">ස්ටොක් ඉතිහාසය (Stock History)</h3>
+        <div class="scroll-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th>දිනය</th>
+                        <th>භාණ්ඩය</th>
+                        <th>ප්‍රමාණය</th>
+                        <th>මිල (Cost)</th>
+                        <th>මුළු වියදම</th>
+                    </tr>
+                </thead>
+                <tbody id="stockHistoryBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<div id="history-view" class="view-section">
+    <section class="history-search-section">
+        <h2 style="margin-top: 0; color: var(--main-blue);">රිසිට් ඉතිහාසය සෙවීම</h2>
+        
+        <div class="form-group">
+            <label>රිසිට් අංකය (Receipt ID):</label>
+            <input type="text" id="receiptIdSearch" class="form-input" placeholder="රිසිට් අංකය ඇතුළත් කරන්න" onkeyup="handleReceiptSearch(event)">
+            <small style="color: #666;">රිසිට් අංකය ඇතුළත් කර එක් රිසිට් එකක් සොයන්න</small>
+        </div>
+
+        <button class="btn btn-search" onclick="searchReceiptById()">
+            <span class="btn-icon">🔍</span> රිසිට් සොයන්න
+        </button>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <h4>මෑත ගනුදෙනු</h4>
+            <div class="scroll-box" style="height: 200px;">
+                <div id="recentReceiptsList"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="history-results-section">
+        <div class="history-summary-cards">
+            <div class="summary-card">
+                <h4>මුළු රිසිට් ගණන</h4>
+                <div id="totalReceiptsCount">0</div>
+            </div>
+            <div class="summary-card">
+                <h4>මුළු ආදායම</h4>
+                <div id="totalReceiptsAmount">0.00</div>
+            </div>
+            <div class="summary-card">
+                <h4>අද දින ආදායම</h4>
+                <div id="todayReceiptsAmount">0.00</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 10px;">මෑත ගනුදෙනු</h3>
+        <div class="scroll-box">
+            <div id="receiptsResults" style="padding: 10px;"></div>
+        </div>
+    </section>
+</div>
+
+<div id="settings-view" class="view-section">
+    <div class="settings-container">
+        <h2 style="color: var(--main-blue);">උපාංග සකසුම් (Device Settings)</h2>
+        <p>ඔබගේ මුද්‍රණ යන්ත්‍රය (Printer) සම්බන්ධ කිරීම සඳහා පහත උපදෙස් අනුගමනය කරන්න.</p>
+        
+        <div class="settings-layout">
+            <div class="settings-card">
+                <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම</h3>
+                <div class="form-group">
+                    <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
+                    <select id="paperSizeSelect" onchange="saveSettings()">
+                        <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
+                        <option value="58mm">58mm (Small Thermal Printer)</option>
+                    </select>
+                    <small style="color: #666;">මෙය ඔබගේ Thermal Printer එකේ ප්‍රමාණය අනුව තෝරන්න.</small>
+                </div>
+                <button class="btn btn-print" onclick="testPrint()">
+                    <span class="btn-icon">🖨️</span> Test Print (උපාංගය පරීක්ෂා කරන්න)
+                </button>
+            </div>
+            <div class="settings-card info-card">
+                <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
+                <ol style="line-height: 1.6; padding-left: 20px;">
+                    <li>ඔබේ POS Printer එක USB මගින් පරිගණකයට සම්බන්ධ කරන්න.</li>
+                    <li>එහි ඩ්‍රයිවර් (Driver) පරිගණකයේ ස්ථාපනය කර ඇති බව තහවුරු කරගන්න.</li>
+                    <li>ඉහත "Test Print" බොත්තම ඔබන්න.</li>
+                    <li>එවිට පැමිණෙන කොටුවෙන් (System Dialog) ඔබේ ප්‍රින්ටරය තෝරා Print කරන්න.</li>
+                </ol>
+            </div>
         </div>
     </div>
 </div>
 
+<div id="discountPopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3>වට්ටම් ඇතුළත් කරන්න</h3>
+        <input type="number" id="discountAmount" class="popup-input" placeholder="වට්ටම් රුපියල් (Rs)">
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="confirmDiscount()">වට්ටම් යොදන්න</button>
+            <button class="btn-cancel" onclick="closeDiscountPopup()">අවලංගු කරන්න</button>
+        </div>
+    </div>
+</div>
+
+<div id="receiptPopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
+        <div id="receiptPreviewBox" class="receipt-preview"></div>
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="printReceipt()" style="background: var(--main-blue);">🖨️ Print Receipt</button>
+            <button class="btn-cancel" onclick="closeReceiptPopup()">වසන්න (Close)</button>
+        </div>
+    </div>
+</div>
+
+<div id="securityPopup" class="popup-overlay">
+    <div class="popup-content security-popup">
+        <div class="security-icon">🔒</div>
+        <h2 class="security-title">Admin Access Required</h2>
+        <p class="security-subtitle">අවසර ලත් පරිශීලකයින්ට පමණි</p>
+        
+        <div class="pin-input-container">
+            <input type="password" 
+                   id="pinInput" 
+                   class="popup-input" 
+                   maxlength="4" 
+                   placeholder="0000" 
+                   oninput="updatePinDots(this.value)"
+                   onkeydown="handlePinKeydown(event)">
+            <div class="pin-dots" id="pinDots">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <div class="pin-error" id="pinError">
+                ❌ වැරදි PIN අංකයක්. නැවත උත්සාහ කරන්න.
+            </div>
+        </div>
+        
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="verifyPin()">Unlock System</button>
+            <button class="btn-cancel" onclick="closeSecurityPopup()">Cancel</button>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 12px; color: #666;">
+            පද්ධතිය Unlock කිරීමට අවශ්‍ය පරිශීලකයාගේ PIN ඇතුළත් කරන්න.
+        </div>
+    </div>
+</div>
+
+<div id="printableReceipt"></div>
+
 <script>
-    // පද්ධතියේ සියලුම JavaScript දත්ත මෙහි ඇත
+    /* --- JavaScript Logic --- */
+
     let inventory = [];
     let cart = [];
-    let stockHistory = [];
-    let salesHistory = [];
-    let isLocked = true;
+    let stockHistory = []; 
+    let salesHistory = []; // New: Store all receipts
+    let isLocked = true; // System starts locked for editing
     let selectedId = null;
+    let totalIncome = 0;
+    let totalProfit = 0;
+    let itemToEdit = null;
+    let discountItemIndex = null;
+    let isDarkMode = false;
+    let paperSize = '80mm';
+    let pinAttempts = 0;
+    const MAX_PIN_ATTEMPTS = 3;
+    let receiptCounter = 1000; // Starting receipt number
 
-    // පද්ධතිය ආරම්භය
     function initialize() {
-        const savedInv = localStorage.getItem('chandana_db');
-        const savedStock = localStorage.getItem('stock_history');
-        const savedSales = localStorage.getItem('sales_history');
-        
-        inventory = savedInv ? JSON.parse(savedInv) : [];
-        stockHistory = savedStock ? JSON.parse(savedStock) : [];
-        salesHistory = savedSales ? JSON.parse(savedSales) : [];
+        const savedTheme = localStorage.getItem('chandana_theme');
+        if (savedTheme === 'dark') enableDarkMode();
 
-        // බඩු 200ක් මුලින්ම නැතිනම් සෑදීම
-        if (inventory.length === 0) {
-            for (let i = 1; i <= 200; i++) {
-                inventory.push({ id: i, name: "භාණ්ඩය " + i, cost: 100, price: 150, stock: 50 });
+        const savedInv = localStorage.getItem('chandana_db');
+        if (savedInv) {
+            inventory = JSON.parse(savedInv);
+        } else {
+            // Sample items for initial testing
+            for (let i = 1; i <= 50; i++) {
+                inventory.push({ 
+                    id: i, 
+                    name: "අයිතමය " + i, 
+                    cost: Math.floor(Math.random() * 500) + 100, 
+                    price: Math.floor(Math.random() * 800) + 150, 
+                    stock: Math.floor(Math.random() * 100) + 10 
+                });
+            }
+            saveToStorage();
+        }
+
+        const savedStock = localStorage.getItem('chandana_stock_history');
+        if (savedStock) {
+            stockHistory = JSON.parse(savedStock);
+        }
+
+        // Load sales history (receipts)
+        const savedSales = localStorage.getItem('chandana_sales_history');
+        if (savedSales) {
+            salesHistory = JSON.parse(savedSales);
+            // Find the highest receipt ID
+            if (salesHistory.length > 0) {
+                receiptCounter = Math.max(...salesHistory.map(r => r.receiptId)) + 1;
             }
         }
+
+        const savedPaper = localStorage.getItem('chandana_paper_size');
+        if (savedPaper) {
+            paperSize = savedPaper;
+            document.getElementById('paperSizeSelect').value = paperSize;
+        }
+
+        // Load income/profit stats
+        const savedStats = localStorage.getItem('chandana_stats');
+        if (savedStats) {
+            const stats = JSON.parse(savedStats);
+            totalIncome = stats.income || 0;
+            totalProfit = stats.profit || 0;
+            updateStatsDisplay();
+        }
+
         renderTable();
-        updateReports();
-    }
-
-    function showPage(pageId, btn) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        btn.classList.add('active');
-        if(pageId === 'stock-page') updateReports();
-    }
-
-    function saveAll() {
-        localStorage.setItem('chandana_db', JSON.stringify(inventory));
-        localStorage.setItem('stock_history', JSON.stringify(stockHistory));
-        localStorage.setItem('sales_history', JSON.stringify(salesHistory));
-    }
-
-    function renderTable() {
-        const body = document.getElementById('inventoryBody');
-        body.innerHTML = inventory.map(item => `
-            <tr onclick="selectRow(${item.id})" id="row-${item.id}">
-                <td>${item.id}</td>
-                <td onclick="directEdit(${item.id}, 'name')">${item.name}</td>
-                <td onclick="directEdit(${item.id}, 'price')">${item.price.toFixed(2)}</td>
-                <td>${item.stock}</td>
-            </tr>
-        `).join('');
-    }
-
-    function selectRow(id) {
-        selectedId = id;
-        document.querySelectorAll('tr').forEach(r => r.style.background="");
-        document.getElementById('row-'+id).style.background="#e3f2fd";
-    }
-
-    function addToCart() {
-        if(!selectedId) return;
-        let item = inventory.find(i => i.id === selectedId);
-        cart.push({...item});
-        updateCartUI();
-    }
-
-    function updateCartUI() {
-        let gt = 0;
-        document.getElementById('cartList').innerHTML = cart.map((c, i) => {
-            gt += c.price;
-            return `<li style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                        <span>${c.name}</span>
-                        <span>${c.price.toFixed(2)} <b style="color:red; cursor:pointer;" onclick="cart.splice(${i},1); updateCartUI();">X</b></span>
-                    </li>`;
-        }).join('');
-        document.getElementById('grandTotal').innerText = gt.toFixed(2);
-    }
-
-    function checkout() {
-        if (cart.length === 0) return;
-        let billProfit = 0;
-        let billTotal = 0;
-        let today = new Date().toLocaleDateString();
-
-        cart.forEach(c => {
-            let item = inventory.find(i => i.id === c.id);
-            if (item.stock > 0) item.stock--;
-            billTotal += c.price;
-            billProfit += (c.price - item.cost);
-        });
-
-        salesHistory.push({ date: today, total: billTotal, profit: billProfit });
-        saveAll();
-        cart = []; updateCartUI(); renderTable();
-        alert("බිල සාර්ථකයි!");
-    }
-
-    function addNewStock() {
-        let name = document.getElementById('stName').value;
-        let cost = parseFloat(document.getElementById('stCost').value);
-        let qty = parseInt(document.getElementById('stQty').value);
-        if (name && cost && qty) {
-            stockHistory.push({ date: new Date().toLocaleDateString(), name, cost, qty });
-            let item = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-            if (item) { item.stock += qty; item.cost = cost; }
-            saveAll(); renderTable(); updateReports();
-            alert("ස්ටොක් යාවත්කාලීන විය!");
+        renderStockHistory();
+        
+        // Load recent receipts
+        loadRecentReceipts();
+        
+        // Auto focus on POS search on load
+        if(document.getElementById('pos-view').classList.contains('active-view')) {
+            document.getElementById('searchInput').focus();
         }
     }
 
-    function updateReports() {
-        let today = new Date().toLocaleDateString();
-        let tProfit = salesHistory.filter(s => s.date === today).reduce((a, b) => a + b.profit, 0);
-        let tCost = stockHistory.reduce((a, b) => a + (b.cost * b.qty), 0);
-        document.getElementById('todayProfit').innerText = tProfit.toFixed(2);
-        document.getElementById('totalStockCost').innerText = tCost.toFixed(2);
-        document.getElementById('stats').innerText = `ආදායම: ${salesHistory.reduce((a,b)=>a+b.total,0).toFixed(2)} | ලාභය: ${tProfit.toFixed(2)}`;
+    function saveToStorage() {
+        localStorage.setItem('chandana_db', JSON.stringify(inventory));
+        localStorage.setItem('chandana_stock_history', JSON.stringify(stockHistory));
+        localStorage.setItem('chandana_sales_history', JSON.stringify(salesHistory));
+        localStorage.setItem('chandana_paper_size', paperSize);
+        
+        // Save income/profit stats
+        localStorage.setItem('chandana_stats', JSON.stringify({
+            income: totalIncome,
+            profit: totalProfit
+        }));
     }
 
-    function handleSecurity() {
-        let p = prompt("PIN අංකය ඇතුළත් කරන්න (1234):");
-        if(p === "1234") { isLocked = false; document.getElementById('lockBtn').style.background="#4caf50"; alert("Unlocked!"); }
+    function updateStatsDisplay() {
+        document.getElementById('stats').innerText = `ආදායම: ${totalIncome.toFixed(2)} | ලාභය: ${totalProfit.toFixed(2)}`;
     }
 
-    function directEdit(id, field) {
-        if(isLocked) return;
-        let item = inventory.find(i => i.id === id);
-        let val = prompt("නව අගය:", item[field]);
-        if(val) { item[field] = (field==='name')?val:parseFloat(val); saveAll(); renderTable(); }
+    function switchView(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(viewName + '-view').classList.add('active-view');
+        document.getElementById('tab-' + viewName).classList.add('active');
+
+        if (viewName === 'pos') {
+            renderTable();
+            document.getElementById('searchInput').focus(); // Auto focus for scanning
+        } else if (viewName === 'stock') {
+            renderStockHistory();
+            document.getElementById('stockItemId').focus(); // Auto focus for stock scanning
+        } else if (viewName === 'history') {
+            loadRecentReceipts();
+            updateReceiptStats();
+            // Auto focus on receipt search
+            setTimeout(() => {
+                document.getElementById('receiptIdSearch').focus();
+            }, 100);
+        }
+    }
+
+    function saveSettings() {
+        paperSize = document.getElementById('paperSizeSelect').value;
+        saveToStorage();
+    }
+
+    /* --- SCANNER & SEARCH LOGIC --- */
+    
+    function handleSearchInput(event) {
+        let val = document.getElementById('searchInput').value;
+        
+        // If Enter key is pressed (Scanner usually sends Enter at the end)
+        if (event.key === "Enter") {
+            let exactMatch = inventory.find(i => i.id == val);
+            
+            if (exactMatch) {
+                // It is a barcode scan (exact ID match) -> Add to cart immediately
+                addToCart(exactMatch.id);
+                document.getElementById('searchInput').value = ""; // Clear for next scan
+                renderTable(); // Reset filter
+            } else {
+                alert("භාණ්ඩය හමු නොවීය! ID: " + val);
+            }
+            return;
+        }
+
+        // Normal typing search (Filter table)
+        searchItem();
+    }
+
+    function handleStockInput(event) {
+        if (event.key === "Enter") {
+            fillItemName(); // Fill details on scan
+        }
+    }
+
+    function handleReceiptSearch(event) {
+        if (event.key === "Enter") {
+            searchReceiptById();
+        }
     }
 
     function searchItem() {
         let f = document.getElementById('searchInput').value.toLowerCase();
         let rows = document.getElementById('inventoryBody').getElementsByTagName('tr');
-        for(let r of rows) { r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none"; }
+        for (let r of rows) r.style.display = r.innerText.toLowerCase().includes(f) ? "" : "none";
     }
+
+    /* --- STOCK LOGIC --- */
+
+    function fillItemName() {
+        const id = parseInt(document.getElementById('stockItemId').value);
+        if(!id) return;
+
+        const item = inventory.find(i => i.id === id);
+        const nameField = document.getElementById('stockItemName');
+        const priceField = document.getElementById('stockPrice');
+        const costField = document.getElementById('stockCost');
+        
+        if (item) {
+            nameField.value = item.name;
+            priceField.value = item.price;
+            costField.value = item.cost;
+        } else {
+            // New Item
+            nameField.value = "";
+            priceField.value = "";
+            costField.value = "";
+        }
+    }
+
+    function addNewStock() {
+        const id = parseInt(document.getElementById('stockItemId').value);
+        const name = document.getElementById('stockItemName').value.trim();
+        const qty = parseInt(document.getElementById('stockQty').value);
+        const cost = parseFloat(document.getElementById('stockCost').value) || 0;
+        const price = parseFloat(document.getElementById('stockPrice').value) || 0;
+
+        if (!id || !qty || qty <= 0) {
+            alert("කරුණාකර නිවැරදි ID එකක් සහ ප්‍රමාණයක් (Qty) ඇතුළත් කරන්න.");
+            return;
+        }
+
+        let item = inventory.find(i => i.id === id);
+
+        if (item) {
+            item.stock += qty;
+            if (cost > 0) item.cost = cost; 
+            if (price > 0) item.price = price;
+            if (name) item.name = name;
+            alert(`ස්ටොක් යාවත්කාලීන විය! නව ප්‍රමාණය: ${item.stock}`);
+        } else {
+            if (!name) return alert("නව අයිතමයක් සඳහා 'නම' ඇතුළත් කිරීම අනිවාර්යයි.");
+            if (!price) return alert("නව අයිතමයක් සඳහා 'විකුණුම් මිල' ඇතුළත් කිරීම අනිවාර්යයි.");
+            
+            const newItem = { id: id, name: name, cost: cost, price: price, stock: qty };
+            inventory.push(newItem);
+            inventory.sort((a, b) => a.id - b.id);
+            alert(`නව අයිතමය සාර්ථකව ඇතුළත් කරන ලදී: ${name}`);
+        }
+
+        const log = {
+            date: new Date().toLocaleString('si-LK'),
+            itemId: id,
+            itemName: name || (item ? item.name : "Unknown"),
+            qty: qty,
+            unitCost: cost || (item ? item.cost : 0),
+            totalCost: qty * (cost || (item ? item.cost : 0))
+        };
+        stockHistory.unshift(log);
+
+        document.getElementById('stockItemId').value = '';
+        document.getElementById('stockItemName').value = '';
+        document.getElementById('stockQty').value = '';
+        document.getElementById('stockCost').value = '';
+        document.getElementById('stockPrice').value = '';
+        
+        // Re-focus for next scan
+        document.getElementById('stockItemId').focus();
+
+        saveToStorage();
+        renderStockHistory();
+        renderTable(); // Update POS table
+    }
+
+    function renderStockHistory() {
+        const body = document.getElementById('stockHistoryBody');
+        let totalInvestment = 0;
+        let totalItems = 0;
+        body.innerHTML = stockHistory.map(log => {
+            totalInvestment += log.totalCost;
+            totalItems += log.qty;
+            return `<tr>
+                    <td style="font-size: 13px;">${log.date}</td>
+                    <td>ID: ${log.itemId} - ${log.itemName}</td>
+                    <td style="color: var(--success-green); font-weight: bold;">+${log.qty}</td>
+                    <td>${log.unitCost.toFixed(2)}</td>
+                    <td>${log.totalCost.toFixed(2)}</td>
+                </tr>`;
+        }).join('');
+        document.getElementById('totalStockInvestment').innerText = "Rs. " + totalInvestment.toFixed(2);
+        document.getElementById('totalStockItemsAdded').innerText = totalItems;
+    }
+
+    /* --- POS CART LOGIC --- */
+
+    function renderTable() {
+        const body = document.getElementById('inventoryBody');
+        body.innerHTML = inventory.map(item => {
+            const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
+            return `<tr onclick="selectRow(${item.id})" id="row-${item.id}">
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.price.toFixed(2)}</td>
+                <td class="${lowStockClass}">${item.stock}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function selectRow(id) {
+        selectedId = id;
+        document.querySelectorAll('tr').forEach(r => r.classList.remove('selected-row'));
+        const row = document.getElementById('row-' + id);
+        if (row) row.classList.add('selected-row');
+    }
+
+    function addToCart(scanId = null) {
+        let idToAdd = scanId ? scanId : selectedId;
+
+        if (!idToAdd) return alert("භාණ්ඩයක් තෝරාගන්න!");
+        let item = inventory.find(i => i.id === idToAdd);
+        
+        if(!item) {
+            alert("භාණ්ඩය හමු නොවීය!");
+            return;
+        }
+        
+        if(item.stock <= 0 && !confirm("අවවාදයයි: මෙම භාණ්ඩය ස්ටොක් එකේ නැත. (Qty: 0). ඉදිරියට යන්නද?")) return;
+        
+        // Check if item already in cart
+        let existingItem = cart.find(c => c.id === idToAdd);
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+            cart.push({ 
+                id: item.id, 
+                name: item.name, 
+                price: item.price, 
+                discount: 0, 
+                quantity: 1 
+            });
+        }
+        
+        updateCartUI();
+        
+        // Scroll cart to bottom to see new item
+        let cartContainer = document.getElementById('cartContainer');
+        cartContainer.scrollTop = cartContainer.scrollHeight;
+    }
+
+    function removeFromCart(index) {
+        if (confirm("ඉවත් කරන්නද?")) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+    }
+    
+    function undoLastItem() {
+        if(cart.length > 0) {
+            cart.pop(); // Remove last item
+            updateCartUI();
+        } else {
+            alert("Undo කිරීමට භාණ්ඩ නොමැත!");
+        }
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cartList');
+        let grossTotal = 0, totalDiscount = 0;
+        
+        list.innerHTML = cart.map((item, idx) => {
+            let quantity = item.quantity || 1;
+            let finalPrice = (item.price - item.discount) * quantity;
+            grossTotal += item.price * quantity;
+            totalDiscount += item.discount * quantity;
+            return `<li>
+                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${quantity > 1 ? 'x' + quantity : ''}</div>
+                    <div style="text-align:right">
+                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * quantity).toFixed(2)}</span><span class="discount-label">-${(item.discount * quantity).toFixed(2)}</span>` : ''}
+                        <b>Rs. ${finalPrice.toFixed(2)}</b>
+                    </div>
+                    <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
+                </li>`;
+        }).join('');
+        
+        let netTotal = grossTotal - totalDiscount;
+        document.getElementById('subTotalDisplay').innerText = grossTotal.toFixed(2);
+        document.getElementById('discountRow').style.display = totalDiscount > 0 ? 'flex' : 'none';
+        document.getElementById('discountDisplay').innerText = "-" + totalDiscount.toFixed(2);
+        document.getElementById('grandTotal').innerText = netTotal.toFixed(2);
+    }
+
+    function checkout() {
+        if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
+        
+        let gross = 0, dis = 0, net = 0;
+        let date = new Date().toLocaleString('si-LK');
+        let receiptId = receiptCounter++;
+        
+        // Create receipt object
+        let receipt = {
+            receiptId: receiptId,
+            date: date,
+            items: [...cart],
+            grossTotal: gross,
+            discountTotal: dis,
+            netTotal: net,
+            paymentMethod: "Cash"
+        };
+        
+        // Build receipt HTML for popup preview AND printable receipt
+        let receiptHTML = `
+            <div style="text-align:center; margin-bottom:10px;">
+                <h3 style="margin:0; font-size:18px;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px;">Receipt ID: ${receiptId}</div>
+                <div style="font-size:12px; margin-bottom:5px;">Tel: 011-1234567</div>
+                <div style="font-size:12px; margin-bottom:10px;">${date}</div>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="margin-bottom:10px;">
+        `;
+        
+        cart.forEach((c, i) => {
+            let item = inventory.find(x => x.id === c.id);
+            if (item) {
+                let reduceQty = c.quantity || 1;
+                if (item.stock >= reduceQty) {
+                    item.stock -= reduceQty;
+                } else {
+                    alert(`${item.name} ස්ටොක් ප්‍රමාණය ප්‍රමාණවත් නැත! (Stock: ${item.stock})`);
+                    item.stock = 0;
+                }
+            }
+            
+            let quantity = c.quantity || 1;
+            let final = (c.price - c.discount) * quantity;
+            gross += c.price * quantity; 
+            dis += c.discount * quantity; 
+            net += final;
+            totalIncome += final;
+            
+            if(item) totalProfit += (final - (item.cost * quantity));
+
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                    <div>${c.name}${quantity > 1 ? ' x' + quantity : ''}</div>
+                    <div>Rs. ${final.toFixed(2)}</div>
+                </div>`;
+        });
+
+        receiptHTML += `
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px;">
+                <span>Subtotal:</span>
+                <span>Rs. ${gross.toFixed(2)}</span>
+            </div>
+        `;
+        
+        if (dis > 0) {
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
+                    <span>Discount:</span>
+                    <span>-Rs. ${dis.toFixed(2)}</span>
+                </div>`;
+        }
+        
+        receiptHTML += `
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px;">
+                <span>TOTAL:</span>
+                <span>Rs. ${net.toFixed(2)}</span>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:11px; color:#666;">
+                Thank You!<br>Come Again!
+            </div>
+        `;
+        
+        // Update receipt object with final totals
+        receipt.grossTotal = gross;
+        receipt.discountTotal = dis;
+        receipt.netTotal = net;
+        
+        // Add to sales history
+        salesHistory.unshift(receipt);
+        
+        // Update stats display
+        updateStatsDisplay();
+        
+        // Show receipt in popup
+        document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
+        document.getElementById('receiptPopup').style.display = 'flex';
+        
+        // Store receipt HTML for printing
+        document.getElementById('printableReceipt').innerHTML = receiptHTML;
+        
+        // Clear cart and update UI
+        cart = []; 
+        updateCartUI(); 
+        saveToStorage(); 
+        renderTable();
+    }
+
+    function closeReceiptPopup() { 
+        document.getElementById('receiptPopup').style.display = 'none'; 
+    }
+
+    /* --- HISTORY FUNCTIONS --- */
+
+    function loadRecentReceipts() {
+        const recentList = document.getElementById('recentReceiptsList');
+        const recentReceipts = salesHistory.slice(0, 10); // Last 10 receipts
+        
+        if (recentReceipts.length === 0) {
+            recentList.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No recent receipts</p>';
+            return;
+        }
+        
+        recentList.innerHTML = recentReceipts.map(receipt => `
+            <div class="receipt-card" onclick="viewReceiptDetails(${receipt.receiptId})" style="cursor:pointer; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:bold;">Receipt #${receipt.receiptId}</div>
+                        <div style="font-size:12px; color:#666;">${receipt.date}</div>
+                    </div>
+                    <div style="font-weight:bold; color:var(--success-green);">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Also load all receipts in the main section (not just search results)
+        displayAllRecentReceipts();
+    }
+    
+    function displayAllRecentReceipts() {
+        const resultsDiv = document.getElementById('receiptsResults');
+        const allReceipts = salesHistory.slice(0, 50); // Show last 50 receipts
+        
+        if (allReceipts.length === 0) {
+            resultsDiv.innerHTML = '<p style="text-align:center; color:#666; padding:20px;">No receipts yet. Make your first sale!</p>';
+            return;
+        }
+        
+        resultsDiv.innerHTML = allReceipts.map(receipt => `
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <div class="receipt-id">Receipt #${receipt.receiptId}</div>
+                    <div class="receipt-date">${receipt.date}</div>
+                </div>
+                
+                <div class="receipt-items">
+                    ${receipt.items.slice(0, 3).map((item, index) => `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+                            <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
+                            <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                    ${receipt.items.length > 3 ? `<div style="font-size:12px; color:#666; text-align:center;">... +${receipt.items.length - 3} more items</div>` : ''}
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
+                    <div>
+                        <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                        ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                    </div>
+                    <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                </div>
+                
+                <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
+                    <span class="btn-icon">🖨️</span> Print Again
+                </button>
+            </div>
+        `).join('');
+    }
+
+    function updateReceiptStats() {
+        const totalReceipts = salesHistory.length;
+        const totalAmount = salesHistory.reduce((sum, r) => sum + r.netTotal, 0);
+        
+        // Calculate today's total
+        const today = new Date().toLocaleDateString('si-LK');
+        const todayReceipts = salesHistory.filter(r => {
+            const receiptDate = r.date.split(',')[0].trim();
+            return receiptDate === today.split(',')[0];
+        });
+        const todayAmount = todayReceipts.reduce((sum, r) => sum + r.netTotal, 0);
+        
+        document.getElementById('totalReceiptsCount').innerText = totalReceipts;
+        document.getElementById('totalReceiptsAmount').innerText = "Rs. " + totalAmount.toFixed(2);
+        document.getElementById('todayReceiptsAmount').innerText = "Rs. " + todayAmount.toFixed(2);
+    }
+
+    function searchReceiptById() {
+        const receiptId = document.getElementById('receiptIdSearch').value.trim();
+        
+        if (!receiptId) {
+            alert("කරුණාකර රිසිට් අංකය ඇතුළත් කරන්න!");
+            document.getElementById('receiptIdSearch').focus();
+            return;
+        }
+        
+        let filteredReceipts = [...salesHistory];
+        
+        // Filter by receipt ID - Exact match or partial match
+        if (receiptId) {
+            filteredReceipts = filteredReceipts.filter(r => 
+                r.receiptId.toString() === receiptId || 
+                r.receiptId.toString().includes(receiptId)
+            );
+        }
+        
+        if (filteredReceipts.length === 0) {
+            alert("රිසිට් අංකය " + receiptId + " සමඟ රිසිට් කිසිවක් හමු නොවීය!");
+            displayAllRecentReceipts();
+            return;
+        }
+        
+        displaySearchResults(filteredReceipts, receiptId);
+    }
+    
+    function displaySearchResults(receipts, searchTerm = "") {
+        const resultsDiv = document.getElementById('receiptsResults');
+        
+        resultsDiv.innerHTML = `
+            <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: bold; color: var(--main-blue);">
+                        ${searchTerm ? 'Search Results for ID: ' + searchTerm : 'Recent Receipts'}
+                        <span style="font-size: 14px; color: #666;"> (${receipts.length} receipts found)</span>
+                    </div>
+                    <button class="btn" style="background: #607d8b; color: white; padding: 5px 10px; font-size: 12px;" onclick="displayAllRecentReceipts()">
+                        Show All Receipts
+                    </button>
+                </div>
+            </div>
+            ${receipts.map(receipt => `
+                <div class="receipt-card">
+                    <div class="receipt-header">
+                        <div class="receipt-id">Receipt #${receipt.receiptId}</div>
+                        <div class="receipt-date">${receipt.date}</div>
+                    </div>
+                    
+                    <div class="receipt-items">
+                        ${receipt.items.map((item, index) => `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px;">
+                                <div>${index+1}. ${item.name} ${item.quantity > 1 ? 'x' + item.quantity : ''}</div>
+                                <div>Rs. ${((item.price - item.discount) * (item.quantity || 1)).toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid #ddd;">
+                        <div>
+                            <div style="font-size:12px; color:#666;">Subtotal: Rs. ${receipt.grossTotal.toFixed(2)}</div>
+                            ${receipt.discountTotal > 0 ? `<div style="font-size:12px; color:var(--discount-color);">Discount: -Rs. ${receipt.discountTotal.toFixed(2)}</div>` : ''}
+                        </div>
+                        <div class="receipt-total">Rs. ${receipt.netTotal.toFixed(2)}</div>
+                    </div>
+                    
+                    <button class="btn btn-reprint" onclick="reprintReceipt(${receipt.receiptId})">
+                        <span class="btn-icon">🖨️</span> Print Again
+                    </button>
+                </div>
+            `).join('')}
+        `;
+        
+        // Clear search input after successful search
+        document.getElementById('receiptIdSearch').value = '';
+    }
+
+    function viewReceiptDetails(receiptId) {
+        const receipt = salesHistory.find(r => r.receiptId === receiptId);
+        if (!receipt) {
+            alert("Receipt not found!");
+            return;
+        }
+        
+        // Build receipt HTML for viewing - FIXED: Always shows in light mode
+        let receiptHTML = `
+            <div style="text-align:center; margin-bottom:10px; color: black;">
+                <h3 style="margin:0; font-size:18px; color: black;">CHANDANA STORES</h3>
+                <div style="font-size:12px; margin-bottom:5px; color: black;">Receipt ID: ${receipt.receiptId}</div>
+                <div style="font-size:12px; margin-bottom:5px; color: black;">Tel: 011-1234567</div>
+                <div style="font-size:12px; margin-bottom:10px; color: black;">${receipt.date}</div>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="margin-bottom:10px;">
+        `;
+        
+        receipt.items.forEach((item, i) => {
+            let quantity = item.quantity || 1;
+            let final = (item.price - item.discount) * quantity;
+            
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color: black;">
+                    <div>${item.name}${quantity > 1 ? ' x' + quantity : ''}</div>
+                    <div>Rs. ${final.toFixed(2)}</div>
+                </div>`;
+        });
+
+        receiptHTML += `
+            </div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color: black;">
+                <span>Subtotal:</span>
+                <span>Rs. ${receipt.grossTotal.toFixed(2)}</span>
+            </div>
+        `;
+        
+        if (receipt.discountTotal > 0) {
+            receiptHTML += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px; font-size:13px; color:red;">
+                    <span>Discount:</span>
+                    <span>-Rs. ${receipt.discountTotal.toFixed(2)}</span>
+                </div>`;
+        }
+        
+        receiptHTML += `
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:5px; border-top:1px solid #333; font-weight:bold; font-size:16px; color: black;">
+                <span>TOTAL:</span>
+                <span>Rs. ${receipt.netTotal.toFixed(2)}</span>
+            </div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:11px; color:#666;">
+                Thank You!<br>Come Again!
+            </div>
+        `;
+        
+        // Store receipt HTML for printing
+        document.getElementById('printableReceipt').innerHTML = receiptHTML;
+        
+        // Show receipt in popup - FIXED: Using receipt-preview class
+        document.getElementById('receiptPreviewBox').innerHTML = receiptHTML;
+        document.getElementById('receiptPopup').style.display = 'flex';
+        document.querySelector('.btn-confirm').innerHTML = '🖨️ Print Receipt';
+        document.querySelector('.btn-confirm').onclick = () => printReceipt();
+    }
+
+    function reprintReceipt(receiptId) {
+        viewReceiptDetails(receiptId);
+    }
+
+    /* --- PRINT FUNCTIONS --- */
+    function testPrint() {
+        const testContent = `
+            <div style="text-align:center; font-weight:bold; font-size:16px;">TEST PRINT</div>
+            <div style="text-align:center; font-size:14px; margin-bottom:10px;">CHANDANA STORES</div>
+            <hr style="border-top: 1px dashed black; margin:5px 0;">
+            <div style="font-size:13px; margin-bottom:3px;">Printer Connection: OK</div>
+            <div style="font-size:13px; margin-bottom:3px;">Time: ${new Date().toLocaleTimeString()}</div>
+            <div style="font-size:13px; margin-bottom:3px;">Date: ${new Date().toLocaleDateString()}</div>
+            <hr style="border-top: 1px dashed black; margin:10px 0 5px 0;">
+            <div style="text-align:center; font-size:12px;">Thank You!</div>
+        `;
+        document.getElementById('printableReceipt').innerHTML = testContent;
+        adjustPrintStyles();
+        window.print();
+    }
+
+    function adjustPrintStyles() {
+        const container = document.getElementById('printableReceipt');
+        container.style.maxWidth = '80mm';
+        container.style.margin = '0 auto';
+        container.style.padding = '10px';
+        container.style.fontFamily = "'Courier New', Courier, monospace";
+        container.style.fontSize = '13px';
+        container.style.color = '#000';
+        container.style.backgroundColor = '#fff';
+        
+        // Adjust for paper size
+        if (paperSize === '58mm') {
+            container.style.maxWidth = '50mm';
+            container.style.fontSize = '11px';
+        }
+    }
+
+    function printReceipt() {
+        adjustPrintStyles();
+        window.print(); 
+    }
+
+    /* --- SECURITY FUNCTIONS --- */
+    
+    function openSecurityPopup() {
+        document.getElementById('securityPopup').style.display = 'flex';
+        document.getElementById('pinInput').value = '';
+        updatePinDots('');
+        document.getElementById('pinInput').focus();
+        document.getElementById('pinError').style.display = 'none';
+    }
+
+    function closeSecurityPopup() {
+        document.getElementById('securityPopup').style.display = 'none';
+        pinAttempts = 0;
+    }
+
+    function updatePinDots(pinValue) {
+        const dots = document.querySelectorAll('.pin-dot');
+        dots.forEach((dot, index) => {
+            if (index < pinValue.length) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    function handlePinKeydown(event) {
+        // Auto-submit when 4 digits are entered
+        if (event.key === 'Enter' && document.getElementById('pinInput').value.length === 4) {
+            verifyPin();
+            event.preventDefault();
+        }
+    }
+
+    function verifyPin() {
+        const enteredPin = document.getElementById('pinInput').value;
+        
+        // Check if PIN is correct (default: 1234)
+        if (enteredPin === "1234") {
+            // Success - unlock system for editing
+            isLocked = false;
+            updateLockButton();
+            closeSecurityPopup();
+            pinAttempts = 0;
+            
+            // Show success message
+            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී!");
+            
+        } else {
+            // Wrong PIN
+            pinAttempts++;
+            document.getElementById('pinError').style.display = 'block';
+            document.getElementById('pinInput').value = '';
+            updatePinDots('');
+            
+            if (pinAttempts >= MAX_PIN_ATTEMPTS) {
+                alert("⚠️ අවවාදය: ඔබ " + MAX_PIN_ATTEMPTS + " වතාවක් වැරදි PIN ඇතුළත් කර ඇත. පද්ධතිය තවදුරටත් Lock කර ඇත.");
+                closeSecurityPopup();
+                pinAttempts = 0;
+            }
+        }
+    }
+
+    function updateLockButton() {
+        const lockBtn = document.getElementById('lockBtn');
+        if (isLocked) {
+            lockBtn.innerHTML = '<span class="btn-icon">🔒</span> Unlock for Editing';
+            lockBtn.className = "btn btn-lock";
+        } else {
+            lockBtn.innerHTML = '<span class="btn-icon">🔓</span> Editing Unlocked';
+            lockBtn.className = "btn btn-unlock";
+        }
+    }
+
+    /* --- MISC FUNCTIONS --- */
+    
+    function enableDarkMode() {
+        document.body.classList.add('dark-mode');
+        isDarkMode = true;
+        document.getElementById('themeToggle').innerText = '☀️';
+        localStorage.setItem('chandana_theme', 'dark');
+    }
+    
+    function enableLightMode() {
+        document.body.classList.remove('dark-mode');
+        isDarkMode = false;
+        document.getElementById('themeToggle').innerText = '🌙';
+        localStorage.setItem('chandana_theme', 'light');
+    }
+    
+    document.getElementById('themeToggle').addEventListener('click', () => isDarkMode ? enableLightMode() : enableDarkMode());
+
+    function showDiscountPopup() {
+        if (cart.length === 0) return alert("කාර්ට් එක හිස්!");
+        let n = parseInt(prompt("වට්ටම් දිය යුතු අංකය (1-" + cart.length + "):"));
+        if (n > 0 && n <= cart.length) {
+            discountItemIndex = n - 1;
+            document.getElementById('discountAmount').value = "";
+            document.getElementById('discountPopup').style.display = 'flex';
+            document.getElementById('discountAmount').focus();
+        } else alert("වැරදි අංකයක්!");
+    }
+    
+    function confirmDiscount() {
+        if (discountItemIndex === null) return;
+        let d = parseFloat(document.getElementById('discountAmount').value) || 0;
+        if (d < 0) return alert("ඍණ අගයක් බැහැ!");
+        if (d > cart[discountItemIndex].price && !confirm("වට්ටම මිලට වඩා වැඩියි!")) return;
+        cart[discountItemIndex].discount = d;
+        updateCartUI(); 
+        closeDiscountPopup();
+    }
+    
+    function closeDiscountPopup() { 
+        document.getElementById('discountPopup').style.display = 'none'; 
+        discountItemIndex = null; 
+    }
+
+    document.addEventListener('keydown', e => {
+        if (document.getElementById('discountPopup').style.display === 'flex' && e.key === 'Enter') { 
+            confirmDiscount(); 
+            e.preventDefault(); 
+        }
+        if (document.getElementById('receiptPopup').style.display === 'flex' && e.key === 'Enter') { 
+            printReceipt(); 
+            e.preventDefault(); 
+        }
+        if (document.getElementById('securityPopup').style.display === 'flex' && e.key === 'Escape') { 
+            closeSecurityPopup(); 
+            e.preventDefault(); 
+        }
+        if (document.getElementById('history-view').classList.contains('active-view') && e.key === 'Escape') { 
+            document.getElementById('receiptIdSearch').value = '';
+            displayAllRecentReceipts();
+        }
+    });
 
     window.onload = initialize;
 </script>
-
 </body>
 </html>
