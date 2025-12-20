@@ -459,6 +459,57 @@
         .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
 
+        /* Edit & Delete Buttons in Table */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        tr:hover .action-buttons {
+            opacity: 1;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .btn-edit {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #1976d2;
+            transform: scale(1.1);
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
+        }
+
+        /* Edit Item Popup */
+        .edit-popup-content {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
         @media print {
             body * { visibility: hidden; }
             #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -486,6 +537,7 @@
             .settings-card { width: 100%; min-width: auto; }
             .nav-tabs { padding: 0 10px; }
             .tab-btn { padding: 12px 15px; font-size: 14px; }
+            .action-buttons { opacity: 1; } /* Always show on mobile */
         }
     </style>
 </head>
@@ -494,6 +546,9 @@
 <header>
     <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
     <div class="header-controls">
+        <button class="btn" id="lockBtn" onclick="toggleLock()" style="padding: 8px 15px; font-size: 14px; background: #ff9800; color: white;">
+            <span class="btn-icon">🔒</span> Unlock for Editing
+        </button>
         <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">🌙</button>
         <div class="stats-display" id="stats">ආදායම: 0.00 | ලාභය: 0.00</div>
     </div>
@@ -520,6 +575,7 @@
                         <th>භාණ්ඩයේ නම</th>
                         <th>මිල</th>
                         <th>ස්ටොක්</th>
+                        <th>ක්‍රියා</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
@@ -772,6 +828,42 @@
     </div>
 </div>
 
+<div id="editItemPopup" class="popup-overlay">
+    <div class="popup-content edit-popup-content">
+        <h3 style="color: var(--main-blue); margin-top: 0;">අයිතමය සංස්කරණය කරන්න</h3>
+        
+        <div class="form-group">
+            <label>භාණ්ඩ ID (නොවෙනස්ව පවතී):</label>
+            <input type="text" id="editItemId" class="form-input" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label>භාණ්ඩයේ නම:</label>
+            <input type="text" id="editItemName" class="form-input" placeholder="භාණ්ඩයේ නම">
+        </div>
+
+        <div class="form-group">
+            <label>විකුණුම් මිල (Selling Price):</label>
+            <input type="number" id="editItemPrice" class="form-input" placeholder="පාරිභෝගික මිල (Rs)" min="0" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label>ගැනුම් මිල (Cost Price):</label>
+            <input type="number" id="editItemCost" class="form-input" placeholder="අපට ගිය වියදම (Rs)" min="0" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label>ස්ටොක් ප්‍රමාණය (Current Stock):</label>
+            <input type="number" id="editItemStock" class="form-input" placeholder="ප්‍රමාණය" min="0">
+        </div>
+
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="saveEditedItem()">සුරකින්න</button>
+            <button class="btn-cancel" onclick="closeEditPopup()">අවලංගු කරන්න</button>
+        </div>
+    </div>
+</div>
+
 <div id="printableReceipt"></div>
 
 <script>
@@ -792,6 +884,7 @@
     let pinAttempts = 0;
     const MAX_PIN_ATTEMPTS = 3;
     let receiptCounter = 1000; // Starting receipt number
+    let editingItemIndex = null; // For edit functionality
 
     function initialize() {
         const savedTheme = localStorage.getItem('chandana_theme');
@@ -854,6 +947,9 @@
         if(document.getElementById('pos-view').classList.contains('active-view')) {
             document.getElementById('searchInput').focus();
         }
+        
+        // Initialize lock button
+        updateLockButton();
     }
 
     function saveToStorage() {
@@ -1043,13 +1139,19 @@
 
     function renderTable() {
         const body = document.getElementById('inventoryBody');
-        body.innerHTML = inventory.map(item => {
+        body.innerHTML = inventory.map((item, index) => {
             const lowStockClass = item.stock < 20 ? 'low-stock-text' : '';
             return `<tr onclick="selectRow(${item.id})" id="row-${item.id}">
                 <td>${item.id}</td>
                 <td>${item.name}</td>
                 <td>${item.price.toFixed(2)}</td>
                 <td class="${lowStockClass}">${item.stock}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-edit" onclick="editItem(${index}, event)" title="Edit Item">✏️</button>
+                        <button class="btn-delete" onclick="deleteItem(${index}, event)" title="Delete Item">🗑️</button>
+                    </div>
+                </td>
             </tr>`;
         }).join('');
     }
@@ -1059,6 +1161,142 @@
         document.querySelectorAll('tr').forEach(r => r.classList.remove('selected-row'));
         const row = document.getElementById('row-' + id);
         if (row) row.classList.add('selected-row');
+    }
+
+    /* --- EDIT & DELETE FUNCTIONS --- */
+
+    // Edit Item Function
+    function editItem(index, event) {
+        event.stopPropagation(); // Prevent row selection
+        
+        if (isLocked) {
+            alert("සංස්කරණය කිරීමට පද්ධතිය Unlock කරන්න! Admin PIN අවශ්‍යයි.");
+            openSecurityPopup();
+            return;
+        }
+        
+        const item = inventory[index];
+        editingItemIndex = index;
+        
+        // Fill edit form with current values
+        document.getElementById('editItemId').value = item.id;
+        document.getElementById('editItemName').value = item.name;
+        document.getElementById('editItemPrice').value = item.price;
+        document.getElementById('editItemCost').value = item.cost;
+        document.getElementById('editItemStock').value = item.stock;
+        
+        // Show edit popup
+        document.getElementById('editItemPopup').style.display = 'flex';
+        document.getElementById('editItemName').focus();
+    }
+
+    // Delete Item Function
+    function deleteItem(index, event) {
+        event.stopPropagation(); // Prevent row selection
+        
+        if (isLocked) {
+            alert("මකාදැමීමට පද්ධතිය Unlock කරන්න! Admin PIN අවශ්‍යයි.");
+            openSecurityPopup();
+            return;
+        }
+        
+        const item = inventory[index];
+        
+        if (confirm(`"${item.name}" (ID: ${item.id}) අයිතමය ස්ථිරවම මකා දැමීමට අවශ්‍යද?\n\nමෙම ක්‍රියාව ආපසු හැරවිය නොහැක.`)) {
+            // Check if item has any stock or sales history
+            let stockHistoryCount = stockHistory.filter(log => log.itemId === item.id).length;
+            let salesHistoryCount = 0;
+            
+            // Check if item appears in any receipts
+            salesHistory.forEach(receipt => {
+                receipt.items.forEach(cartItem => {
+                    if (cartItem.id === item.id) {
+                        salesHistoryCount++;
+                    }
+                });
+            });
+            
+            let warningMessage = "";
+            if (item.stock > 0) {
+                warningMessage += `\n⚠️ මෙම අයිතමයේ තවම ${item.stock} ප්‍රමාණයක් ස්ටොක් එකේ ඇත.`;
+            }
+            if (stockHistoryCount > 0) {
+                warningMessage += `\n⚠️ මෙම අයිතමය ${stockHistoryCount} වතාවක් ස්ටොක් ඉතිහාසයේ ඇත.`;
+            }
+            if (salesHistoryCount > 0) {
+                warningMessage += `\n⚠️ මෙම අයිතමය ${salesHistoryCount} වතාවක් ගනුදෙනු ඉතිහාසයේ ඇත.`;
+            }
+            
+            if (warningMessage && !confirm(`මකාදැමීම අවදානම් කරයි!${warningMessage}\n\nතවදුරටත් ඉදිරියට යන්නද?`)) {
+                return;
+            }
+            
+            // Remove item from inventory
+            inventory.splice(index, 1);
+            
+            // Save changes
+            saveToStorage();
+            renderTable();
+            
+            alert("අයිතමය සාර්ථකව මකා දමන ලදී!");
+        }
+    }
+
+    // Save Edited Item
+    function saveEditedItem() {
+        if (editingItemIndex === null) return;
+        
+        const id = parseInt(document.getElementById('editItemId').value);
+        const name = document.getElementById('editItemName').value.trim();
+        const price = parseFloat(document.getElementById('editItemPrice').value);
+        const cost = parseFloat(document.getElementById('editItemCost').value);
+        const stock = parseInt(document.getElementById('editItemStock').value);
+        
+        // Validation
+        if (!name) {
+            alert("භාණ්ඩයේ නම හිස් විය නොහැක!");
+            document.getElementById('editItemName').focus();
+            return;
+        }
+        
+        if (price <= 0) {
+            alert("විකුණුම් මිල ධන අගයක් විය යුතුය!");
+            document.getElementById('editItemPrice').focus();
+            return;
+        }
+        
+        if (cost < 0) {
+            alert("ගැනුම් මිල ඍණ අගයක් විය නොහැක!");
+            document.getElementById('editItemCost').focus();
+            return;
+        }
+        
+        if (stock < 0) {
+            alert("ස්ටොක් ප්‍රමාණය ඍණ අගයක් විය නොහැක!");
+            document.getElementById('editItemStock').focus();
+            return;
+        }
+        
+        // Update item
+        inventory[editingItemIndex].name = name;
+        inventory[editingItemIndex].price = price;
+        inventory[editingItemIndex].cost = cost;
+        inventory[editingItemIndex].stock = stock;
+        
+        // Save changes
+        saveToStorage();
+        renderTable();
+        
+        // Close popup
+        closeEditPopup();
+        
+        alert("අයිතමය සාර්ථකව යාවත්කාලීන කරන ලදී!");
+    }
+
+    // Close Edit Popup
+    function closeEditPopup() {
+        document.getElementById('editItemPopup').style.display = 'none';
+        editingItemIndex = null;
     }
 
     function addToCart(scanId = null) {
@@ -1572,7 +1810,7 @@
             pinAttempts = 0;
             
             // Show success message
-            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී!");
+            alert("✅ පද්ධතිය සාර්ථකව Unlock කරන ලදී! දැන් ඔබට අයිතම සංස්කරණය කළ හැකිය.");
             
         } else {
             // Wrong PIN
@@ -1589,14 +1827,31 @@
         }
     }
 
+    /* --- LOCK/UNLOCK FUNCTIONS --- */
+    
+    // Toggle Lock Function
+    function toggleLock() {
+        if (isLocked) {
+            // Currently locked, ask for PIN
+            openSecurityPopup();
+        } else {
+            // Currently unlocked, lock it
+            isLocked = true;
+            updateLockButton();
+            alert("🔒 පද්ධතිය Lock කරන ලදී. අයිතම සංස්කරණය කිරීම අක්‍රීය කර ඇත.");
+        }
+    }
+
     function updateLockButton() {
         const lockBtn = document.getElementById('lockBtn');
         if (isLocked) {
             lockBtn.innerHTML = '<span class="btn-icon">🔒</span> Unlock for Editing';
-            lockBtn.className = "btn btn-lock";
+            lockBtn.style.background = '#ff9800';
+            lockBtn.style.color = 'white';
         } else {
             lockBtn.innerHTML = '<span class="btn-icon">🔓</span> Editing Unlocked';
-            lockBtn.className = "btn btn-unlock";
+            lockBtn.style.background = '#4caf50';
+            lockBtn.style.color = 'white';
         }
     }
 
@@ -1656,6 +1911,15 @@
         if (document.getElementById('securityPopup').style.display === 'flex' && e.key === 'Escape') { 
             closeSecurityPopup(); 
             e.preventDefault(); 
+        }
+        if (document.getElementById('editItemPopup').style.display === 'flex' && e.key === 'Escape') {
+            closeEditPopup();
+            e.preventDefault();
+        }
+        if (document.getElementById('editItemPopup').style.display === 'flex' && e.key === 'Enter' && 
+            !e.target.matches('textarea')) {
+            saveEditedItem();
+            e.preventDefault();
         }
         if (document.getElementById('history-view').classList.contains('active-view') && e.key === 'Escape') { 
             document.getElementById('receiptIdSearch').value = '';
