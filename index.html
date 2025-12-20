@@ -447,14 +447,58 @@
         }
 
         /* Cart Styling */
-        #cartList li { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        #cartList li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border-color); 
+            position: relative;
+        }
         .original-price-strike { text-decoration: line-through; color: #888; font-size: 12px; display: block; }
         .discount-label { color: var(--discount-color); font-size: 12px; font-weight: bold; display: block; }
         .bill-summary { padding: 15px 0; border-top: 2px dashed var(--border-color); margin-top: 10px; }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
         .summary-row.total { font-size: 22px; font-weight: bold; color: var(--main-blue); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
         .summary-row.discount-row { color: var(--discount-color); }
-        .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
+        .cart-item-controls {
+            display: flex;
+            gap: 8px;
+            margin-left: 10px;
+        }
+        .cart-control-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .cart-control-btn:hover {
+            transform: scale(1.1);
+        }
+        .delete-btn {
+            color: var(--error-red);
+            background: rgba(198, 40, 40, 0.1);
+        }
+        .edit-btn {
+            color: var(--main-blue);
+            background: rgba(57, 73, 171, 0.1);
+        }
+        .quantity-btn {
+            color: var(--success-green);
+            background: rgba(46, 125, 50, 0.1);
+            font-weight: bold;
+        }
+        .cart-item-details {
+            flex: 1;
+            padding-right: 10px;
+        }
 
         .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
         .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
@@ -520,6 +564,11 @@
             .settings-card { width: 100%; min-width: auto; }
             .nav-tabs { padding: 0 10px; }
             .tab-btn { padding: 12px 15px; font-size: 14px; }
+            .cart-control-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -554,6 +603,7 @@
                         <th>භාණ්ඩයේ නම</th>
                         <th>මිල</th>
                         <th>ස්ටොක්</th>
+                        <th style="width: 80px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="inventoryBody">
@@ -770,6 +820,28 @@
     </div>
 </div>
 
+<div id="editItemPopup" class="popup-overlay">
+    <div class="popup-content">
+        <h3>අයිතමය සංස්කරණය කරන්න</h3>
+        <div class="form-group">
+            <label>භාණ්ඩයේ නම:</label>
+            <input type="text" id="editItemName" class="form-input" placeholder="භාණ්ඩයේ නම">
+        </div>
+        <div class="form-group">
+            <label>ප්‍රමාණය (Qty):</label>
+            <input type="number" id="editItemQty" class="form-input" placeholder="ප්‍රමාණය" min="1">
+        </div>
+        <div class="form-group">
+            <label>වට්ටම් (Discount):</label>
+            <input type="number" id="editItemDiscount" class="form-input" placeholder="වට්ටම් රුපියල් (Rs)" min="0" step="0.01">
+        </div>
+        <div class="popup-buttons">
+            <button class="btn-confirm" onclick="saveEditedItem()">සුරකින්න</button>
+            <button class="btn-cancel" onclick="closeEditPopup()">අවලංගු කරන්න</button>
+        </div>
+    </div>
+</div>
+
 <div id="securityPopup" class="popup-overlay">
     <div class="popup-content security-popup">
         <div class="security-icon">🔒</div>
@@ -826,6 +898,7 @@
     let pinAttempts = 0;
     const MAX_PIN_ATTEMPTS = 3;
     let receiptCounter = 1000; // Starting receipt number
+    let itemToEditIndex = null; // For editing cart items
 
     function initialize() {
         const savedTheme = localStorage.getItem('chandana_theme');
@@ -1084,6 +1157,11 @@
                 <td>${item.name}</td>
                 <td>${item.price.toFixed(2)}</td>
                 <td class="${lowStockClass}">${item.stock}</td>
+                <td>
+                    <button class="cart-control-btn edit-btn" onclick="editInventoryItem(${item.id}, event)" title="Edit">
+                        ✏️
+                    </button>
+                </td>
             </tr>`;
         }).join('');
     }
@@ -1130,10 +1208,47 @@
     }
 
     function removeFromCart(index) {
-        if (confirm("ඉවත් කරන්නද?")) {
+        if (confirm("භාණ්ඩය ඉවත් කරන්නද?")) {
             cart.splice(index, 1);
             updateCartUI();
         }
+    }
+    
+    function editCartItem(index) {
+        const item = cart[index];
+        itemToEditIndex = index;
+        
+        document.getElementById('editItemName').value = item.name;
+        document.getElementById('editItemQty').value = item.quantity || 1;
+        document.getElementById('editItemDiscount').value = item.discount || 0;
+        
+        document.getElementById('editItemPopup').style.display = 'flex';
+        document.getElementById('editItemQty').focus();
+    }
+    
+    function saveEditedItem() {
+        if (itemToEditIndex === null) return;
+        
+        const newName = document.getElementById('editItemName').value.trim();
+        const newQty = parseInt(document.getElementById('editItemQty').value) || 1;
+        const newDiscount = parseFloat(document.getElementById('editItemDiscount').value) || 0;
+        
+        if (newQty < 1) {
+            alert("ප්‍රමාණය 0 ට වඩා වැඩි විය යුතුය!");
+            return;
+        }
+        
+        cart[itemToEditIndex].name = newName;
+        cart[itemToEditIndex].quantity = newQty;
+        cart[itemToEditIndex].discount = newDiscount;
+        
+        updateCartUI();
+        closeEditPopup();
+    }
+    
+    function closeEditPopup() {
+        document.getElementById('editItemPopup').style.display = 'none';
+        itemToEditIndex = null;
     }
     
     function undoLastItem() {
@@ -1155,12 +1270,29 @@
             grossTotal += item.price * quantity;
             totalDiscount += item.discount * quantity;
             return `<li>
-                    <div style="flex:1"><b>${idx+1}. ${item.name}</b> ${quantity > 1 ? 'x' + quantity : ''}</div>
-                    <div style="text-align:right">
-                        ${item.discount > 0 ? `<span class="original-price-strike">Rs. ${(item.price * quantity).toFixed(2)}</span><span class="discount-label">-${(item.discount * quantity).toFixed(2)}</span>` : ''}
-                        <b>Rs. ${finalPrice.toFixed(2)}</b>
+                    <div class="cart-item-details">
+                        <div><b>${idx+1}. ${item.name}</b></div>
+                        <div style="font-size: 12px; color: #666;">
+                            Unit: Rs. ${item.price.toFixed(2)} 
+                            ${item.discount > 0 ? `| Discount: Rs. ${item.discount.toFixed(2)}` : ''}
+                        </div>
                     </div>
-                    <div class="remove-btn" onclick="removeFromCart(${idx})">✕</div>
+                    <div style="text-align:right; min-width: 100px;">
+                        <div class="quantity-btn" style="display: inline-block; margin-right: 10px; font-weight: bold;">
+                            x${quantity}
+                        </div>
+                        <div style="display: inline-block;">
+                            <b>Rs. ${finalPrice.toFixed(2)}</b>
+                        </div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <button class="cart-control-btn edit-btn" onclick="editCartItem(${idx})" title="Edit">
+                            ✏️
+                        </button>
+                        <button class="cart-control-btn delete-btn" onclick="removeFromCart(${idx})" title="Delete">
+                            🗑️
+                        </button>
+                    </div>
                 </li>`;
         }).join('');
         
@@ -1287,6 +1419,50 @@
 
     function closeReceiptPopup() { 
         document.getElementById('receiptPopup').style.display = 'none'; 
+    }
+
+    /* --- INVENTORY EDIT FUNCTION --- */
+    function editInventoryItem(itemId, event) {
+        event.stopPropagation(); // Prevent row selection
+        
+        const item = inventory.find(i => i.id === itemId);
+        if (!item) return;
+        
+        const newName = prompt("නව නම ඇතුළත් කරන්න:", item.name);
+        if (newName === null) return; // User cancelled
+        
+        if (newName.trim() === "") {
+            alert("නම හිස් විය නොහැක!");
+            return;
+        }
+        
+        const newStock = prompt("නව ස්ටොක් ප්‍රමාණය ඇතුළත් කරන්න:", item.stock);
+        if (newStock === null) return;
+        
+        const stockNum = parseInt(newStock);
+        if (isNaN(stockNum) || stockNum < 0) {
+            alert("වලංගු ස්ටොක් ප්‍රමාණයක් ඇතුළත් කරන්න!");
+            return;
+        }
+        
+        item.name = newName.trim();
+        item.stock = stockNum;
+        
+        // Ask if user wants to update price
+        const updatePrice = confirm("මිලදී ගැනීමේ මිලදී වෙනස් කරන්නද?");
+        if (updatePrice) {
+            const newPrice = prompt("නව විකුණුම් මිල ඇතුළත් කරන්න:", item.price);
+            if (newPrice !== null) {
+                const priceNum = parseFloat(newPrice);
+                if (!isNaN(priceNum) && priceNum >= 0) {
+                    item.price = priceNum;
+                }
+            }
+        }
+        
+        saveToStorage();
+        renderTable();
+        alert("අයිතමය සාර්ථකව යාවත්කාලීන කරන ලදී!");
     }
 
     /* --- HISTORY FUNCTIONS --- */
@@ -1708,6 +1884,14 @@
             closeSecurityPopup(); 
             e.preventDefault(); 
         }
+        if (document.getElementById('editItemPopup').style.display === 'flex' && e.key === 'Enter') {
+            saveEditedItem();
+            e.preventDefault();
+        }
+        if (document.getElementById('editItemPopup').style.display === 'flex' && e.key === 'Escape') {
+            closeEditPopup();
+            e.preventDefault();
+        }
         if (document.getElementById('history-view').classList.contains('active-view') && e.key === 'Escape') { 
             document.getElementById('receiptIdSearch').value = '';
             displayAllRecentReceipts();
@@ -1718,5 +1902,3 @@
 </script>
 </body>
 </html>
-
-
