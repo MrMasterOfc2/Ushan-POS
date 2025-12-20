@@ -49,13 +49,55 @@
         header {
             background: var(--main-blue);
             color: white;
-            padding: 15px 25px;
+            padding: 10px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             position: relative;
             z-index: 10;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--main-blue);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .store-name {
+            font-size: 22px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .store-tagline {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 2px;
+            font-weight: normal;
         }
 
         .header-controls {
@@ -71,6 +113,9 @@
             border-bottom: 1px solid var(--border-color);
             padding: 0 20px;
             flex-wrap: wrap;
+            border-radius: 0 0 12px 12px;
+            margin: 0 10px;
+            box-shadow: 0 2px 4px var(--shadow);
         }
 
         .tab-btn {
@@ -85,6 +130,7 @@
             opacity: 0.6;
             transition: all 0.3s;
             white-space: nowrap;
+            border-radius: 8px 8px 0 0;
         }
 
         .tab-btn:hover {
@@ -96,6 +142,7 @@
             border-bottom-color: var(--main-blue);
             color: var(--main-blue);
             opacity: 1;
+            background: var(--bg-secondary);
         }
 
         /* View Container */
@@ -103,8 +150,8 @@
             display: none; /* Hidden by default */
             flex: 1;
             overflow: hidden;
-            padding: 10px;
-            gap: 15px;
+            padding: 15px;
+            gap: 20px;
             height: 100%;
         }
 
@@ -116,24 +163,24 @@
         .inventory-section {
             flex: 2;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
         }
 
         .billing-section {
             flex: 1;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
-            padding: 15px;
+            padding: 20px;
             border-left: 5px solid var(--main-blue);
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             min-width: 340px;
         }
 
@@ -141,10 +188,10 @@
         .stock-form-section {
             flex: 1;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             display: flex;
             flex-direction: column;
             max-width: 400px;
@@ -154,10 +201,10 @@
         .stock-history-section {
             flex: 2;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             display: flex;
             flex-direction: column;
         }
@@ -166,10 +213,10 @@
         .history-search-section {
             flex: 1;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             display: flex;
             flex-direction: column;
             max-width: 400px;
@@ -179,10 +226,10 @@
         .history-results-section {
             flex: 2;
             background: var(--bg-primary);
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 20px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             display: flex;
             flex-direction: column;
         }
@@ -191,13 +238,13 @@
         .settings-container {
             flex: 1;
             background: var(--bg-primary);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             border: 1px solid var(--border-color);
             max-width: 1000px;
             width: 100%;
             margin: 0 auto;
-            box-shadow: 0 2px 4px var(--shadow);
+            box-shadow: 0 4px 12px var(--shadow);
             overflow-y: auto;
         }
 
@@ -212,9 +259,9 @@
             min-width: 300px; 
             padding: 20px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             background: var(--bg-primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .settings-card.info-card {
@@ -242,10 +289,11 @@
             flex: 1;
             background: var(--bg-secondary);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             border-left: 4px solid var(--warning-orange);
             text-align: center;
             min-width: 200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
         .summary-card h4 { margin: 0; font-size: 14px; opacity: 0.8; }
@@ -253,16 +301,17 @@
 
         .receipt-card {
             background: var(--bg-secondary);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
             transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .receipt-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
         }
 
         .receipt-header {
@@ -302,7 +351,7 @@
             padding: 12px;
             font-size: 16px;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 8px;
             background-color: var(--bg-primary);
             color: var(--text-primary);
             box-sizing: border-box;
@@ -311,6 +360,7 @@
         .form-input:focus, .search-bar:focus {
             outline: none;
             border-color: var(--main-blue);
+            box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.1);
         }
 
         .form-input[readonly] {
@@ -319,9 +369,9 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
@@ -329,30 +379,87 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px var(--shadow); }
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px var(--shadow); 
+        }
         
         .btn-lock { background: #ff9800; color: white; }
         .btn-unlock { background: #4caf50; color: white; }
-        .btn-pay { background: var(--main-blue); color: white; width: 100%; padding: 15px; font-size: 18px; margin-top: 10px; }
-        .btn-add-stock { background: var(--success-green); color: white; width: 100%; padding: 12px; font-size: 16px; }
-        .btn-print { background: #607d8b; color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 10px; }
-        .btn-undo { background: #e53935; color: white; margin-left: auto; }
-        .btn-search { background: var(--main-blue); color: white; width: 100%; padding: 12px; font-size: 16px; margin-top: 5px; }
-        .btn-reprint { background: var(--warning-orange); color: white; padding: 8px 15px; font-size: 14px; margin-top: 5px; }
+        .btn-pay { 
+            background: var(--main-blue); 
+            color: white; 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 18px; 
+            margin-top: 10px; 
+            border-radius: 10px;
+        }
+        .btn-add-stock { 
+            background: var(--success-green); 
+            color: white; 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            border-radius: 10px;
+        }
+        .btn-print { 
+            background: #607d8b; 
+            color: white; 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            margin-top: 10px; 
+            border-radius: 10px;
+        }
+        .btn-undo { 
+            background: #e53935; 
+            color: white; 
+            margin-left: auto; 
+            border-radius: 8px;
+        }
+        .btn-search { 
+            background: var(--main-blue); 
+            color: white; 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            margin-top: 5px; 
+            border-radius: 10px;
+        }
+        .btn-reprint { 
+            background: var(--warning-orange); 
+            color: white; 
+            padding: 8px 15px; 
+            font-size: 14px; 
+            margin-top: 5px; 
+            border-radius: 6px;
+        }
 
         /* Table */
         .scroll-box {
             flex: 1;
             overflow-y: auto;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 10px;
             background: var(--bg-primary);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
 
         table { width: 100%; border-collapse: collapse; }
-        th { background: var(--bg-secondary); padding: 12px; position: sticky; top: 0; text-align: left; border-bottom: 2px solid var(--border-color); color: var(--text-primary); }
-        td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+        th { 
+            background: var(--bg-secondary); 
+            padding: 14px; 
+            position: sticky; 
+            top: 0; 
+            text-align: left; 
+            border-bottom: 2px solid var(--border-color); 
+            color: var(--text-primary); 
+            font-weight: bold;
+        }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
         tr:hover { background: var(--bg-secondary); cursor: pointer; }
         .selected-row { background: rgba(57, 73, 171, 0.1) !important; border-left: 3px solid var(--main-blue); }
 
@@ -391,7 +498,7 @@
             padding: 12px; 
             margin: 10px 0; 
             border: 1px solid var(--border-color); 
-            border-radius: 5px; 
+            border-radius: 8px; 
             background: var(--bg-primary); 
             color: var(--text-primary); 
             box-sizing: border-box; 
@@ -400,8 +507,25 @@
             letter-spacing: 3px;
         }
         .popup-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-confirm { background: var(--success-green); color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-cancel { background: #757575; color: white; flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-confirm { 
+            background: var(--success-green); 
+            color: white; 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        .btn-cancel { 
+            background: #757575; 
+            color: white; 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+        }
 
         /* PIN Popup Specific */
         .security-icon {
@@ -447,17 +571,72 @@
         }
 
         /* Cart Styling */
-        #cartList li { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        #cartList li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border-color); 
+            border-radius: 6px;
+            margin-bottom: 5px;
+            background: var(--bg-primary);
+        }
+        #cartList li:hover {
+            background: var(--bg-secondary);
+        }
         .original-price-strike { text-decoration: line-through; color: #888; font-size: 12px; display: block; }
         .discount-label { color: var(--discount-color); font-size: 12px; font-weight: bold; display: block; }
-        .bill-summary { padding: 15px 0; border-top: 2px dashed var(--border-color); margin-top: 10px; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .summary-row.total { font-size: 22px; font-weight: bold; color: var(--main-blue); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        .bill-summary { 
+            padding: 15px 0; 
+            border-top: 2px dashed var(--border-color); 
+            margin-top: 10px; 
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            padding: 15px;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .summary-row.total { 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: var(--main-blue); 
+            margin-top: 10px; 
+            padding-top: 10px; 
+            border-top: 1px solid var(--border-color); 
+        }
         .summary-row.discount-row { color: var(--discount-color); }
-        .remove-btn { color: var(--error-red); cursor: pointer; margin-left: 10px; }
+        .remove-btn { 
+            color: var(--error-red); 
+            cursor: pointer; 
+            margin-left: 10px; 
+            padding: 5px 10px;
+            border-radius: 4px;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        .remove-btn:hover {
+            background: rgba(244, 67, 54, 0.2);
+        }
 
-        .theme-toggle { background: none; border: none; color: white; cursor: pointer; font-size: 20px; }
-        .stats-display { font-size: 14px; color: #ccff90; text-align: right; }
+        .theme-toggle { 
+            background: none; 
+            border: none; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 20px; 
+            padding: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .stats-display { 
+            font-size: 14px; 
+            color: #ccff90; 
+            text-align: right; 
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
 
         /* Edit & Delete Buttons in Table */
         .action-buttons {
@@ -472,16 +651,17 @@
         }
 
         .btn-edit, .btn-delete {
-            padding: 4px 8px;
+            padding: 6px 10px;
             font-size: 12px;
             border: none;
-            border-radius: 3px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
+            transition: all 0.2s;
         }
 
         .btn-edit {
@@ -508,6 +688,26 @@
         .edit-popup-content {
             max-height: 80vh;
             overflow-y: auto;
+            border-radius: 15px;
+        }
+
+        /* Stock History Delete Button */
+        .stock-history-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+
+        .stock-history-delete:hover {
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         @media print {
@@ -527,7 +727,7 @@
             padding: 15px;
             margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 10px;
         }
 
         @media (max-width: 768px) {
@@ -538,15 +738,26 @@
             .nav-tabs { padding: 0 10px; }
             .tab-btn { padding: 12px 15px; font-size: 14px; }
             .action-buttons { opacity: 1; } /* Always show on mobile */
+            header { padding: 10px 15px; }
+            .store-name { font-size: 18px; }
+            .logo-placeholder { width: 40px; height: 40px; font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-size: 20px; font-weight: bold;">CHANDANA STORES</div>
+    <div class="header-logo">
+        <div class="logo-container">
+            <div class="logo-placeholder" id="logoPlaceholder">CS</div>
+            <div>
+                <div class="store-name">CHANDANA STORES</div>
+                <div class="store-tagline">Professional POS & Inventory System</div>
+            </div>
+        </div>
+    </div>
     <div class="header-controls">
-        <button class="btn" id="lockBtn" onclick="toggleLock()" style="padding: 8px 15px; font-size: 14px; background: #ff9800; color: white;">
+        <button class="btn" id="lockBtn" onclick="toggleLock()" style="padding: 8px 15px; font-size: 14px; background: #ff9800; color: white; border-radius: 8px;">
             <span class="btn-icon">🔒</span> Unlock for Editing
         </button>
         <button class="theme-toggle" id="themeToggle" title="Dark/Light Mode">🌙</button>
@@ -563,8 +774,8 @@
 
 <div id="pos-view" class="view-section active-view">
     <section class="inventory-section">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-            <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Scan Barcode or Type Name..." onkeyup="handleSearchInput(event)">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Scan Barcode or Type Name..." onkeyup="handleSearchInput(event)" style="border-radius: 10px;">
         </div>
 
         <div class="scroll-box">
@@ -582,25 +793,25 @@
                 </tbody>
             </table>
         </div>
-        <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px;" onclick="addToCart()">
+        <button class="btn" style="background: var(--success-green); color: white; margin-top: 15px; padding: 15px; border-radius: 10px;" onclick="addToCart()">
             <span class="btn-icon">➕</span> කාර්ට් එකට දාන්න (Select & Add)
         </button>
     </section>
 
     <section class="billing-section">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin-top: 0;">වත්මන් බිල</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin-top: 0; color: var(--main-blue);">වත්මන් බිල</h2>
             <button class="btn btn-undo" onclick="undoLastItem()" title="Remove last scanned item">
                 ↩ Undo Last
             </button>
         </div>
         
-        <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none;">
-            <ul id="cartList" style="list-style: none; padding: 0;"></ul>
+        <div class="scroll-box" id="cartContainer" style="background: var(--bg-secondary); border: none; border-radius: 10px;">
+            <ul id="cartList" style="list-style: none; padding: 10px; margin: 0;"></ul>
         </div>
 
-        <div style="margin-top: 10px;">
-            <button class="btn" style="background: #607d8b; color: white; width: 100%; margin-bottom: 5px; border-color: #546e7a;" onclick="showDiscountPopup()">
+        <div style="margin-top: 15px;">
+            <button class="btn" style="background: #607d8b; color: white; width: 100%; margin-bottom: 10px; border-color: #546e7a; border-radius: 10px;" onclick="showDiscountPopup()">
                 <span class="btn-icon">💰</span> වට්ටම් (Discount)
             </button>
             
@@ -673,7 +884,7 @@
             </div>
         </div>
 
-        <h3 style="margin-bottom: 10px;">ස්ටොක් ඉතිහාසය (Stock History)</h3>
+        <h3 style="margin-bottom: 15px; color: var(--main-blue);">ස්ටොක් ඉතිහාසය (Stock History)</h3>
         <div class="scroll-box">
             <table>
                 <thead>
@@ -683,6 +894,7 @@
                         <th>ප්‍රමාණය</th>
                         <th>මිල (Cost)</th>
                         <th>මුළු වියදම</th>
+                        <th>ක්‍රියා</th>
                     </tr>
                 </thead>
                 <tbody id="stockHistoryBody">
@@ -708,7 +920,7 @@
 
         <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
             <h4>මෑත ගනුදෙනු</h4>
-            <div class="scroll-box" style="height: 200px;">
+            <div class="scroll-box" style="height: 200px; border-radius: 10px;">
                 <div id="recentReceiptsList"></div>
             </div>
         </div>
@@ -730,24 +942,24 @@
             </div>
         </div>
 
-        <h3 style="margin-bottom: 10px;">මෑත ගනුදෙනු</h3>
+        <h3 style="margin-bottom: 15px; color: var(--main-blue);">මෑත ගනුදෙනු</h3>
         <div class="scroll-box">
-            <div id="receiptsResults" style="padding: 10px;"></div>
+            <div id="receiptsResults" style="padding: 15px;"></div>
         </div>
     </section>
 </div>
 
 <div id="settings-view" class="view-section">
     <div class="settings-container">
-        <h2 style="color: var(--main-blue);">උපාංග සකසුම් (Device Settings)</h2>
+        <h2 style="color: var(--main-blue); margin-top: 0;">උපාංග සකසුම් (Device Settings)</h2>
         <p>ඔබගේ මුද්‍රණ යන්ත්‍රය (Printer) සම්බන්ධ කිරීම සඳහා පහත උපදෙස් අනුගමනය කරන්න.</p>
         
         <div class="settings-layout">
             <div class="settings-card">
-                <h3>🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම</h3>
+                <h3 style="color: var(--main-blue);">🖨️ මුද්‍රණ යන්ත්‍රය සැකසීම</h3>
                 <div class="form-group">
                     <label>රිසිට් පතේ ප්‍රමාණය (Paper Size):</label>
-                    <select id="paperSizeSelect" onchange="saveSettings()">
+                    <select id="paperSizeSelect" onchange="saveSettings()" class="form-input">
                         <option value="80mm">80mm (Thermal POS Printer - Standard)</option>
                         <option value="58mm">58mm (Small Thermal Printer)</option>
                     </select>
@@ -758,7 +970,7 @@
                 </button>
             </div>
             <div class="settings-card info-card">
-                <h4>උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
+                <h4 style="color: var(--main-blue);">උපාංගයට සම්බන්ධ වන්නේ කෙසේද?</h4>
                 <ol style="line-height: 1.6; padding-left: 20px;">
                     <li>ඔබේ POS Printer එක USB මගින් පරිගණකයට සම්බන්ධ කරන්න.</li>
                     <li>එහි ඩ්‍රයිවර් (Driver) පරිගණකයේ ස්ථාපනය කර ඇති බව තහවුරු කරගන්න.</li>
@@ -772,7 +984,7 @@
 
 <div id="discountPopup" class="popup-overlay">
     <div class="popup-content">
-        <h3>වට්ටම් ඇතුළත් කරන්න</h3>
+        <h3 style="color: var(--main-blue);">වට්ටම් ඇතුළත් කරන්න</h3>
         <input type="number" id="discountAmount" class="popup-input" placeholder="වට්ටම් රුපියල් (Rs)">
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="confirmDiscount()">වට්ටම් යොදන්න</button>
@@ -783,7 +995,7 @@
 
 <div id="receiptPopup" class="popup-overlay">
     <div class="popup-content">
-        <h3 style="color: var(--success-green);">ගෙවීම සාර්ථකයි! ✓</h3>
+        <h3 style="color: var(--success-green); margin-top: 0;">ගෙවීම සාර්ථකයි! ✓</h3>
         <div id="receiptPreviewBox" class="receipt-preview"></div>
         <div class="popup-buttons">
             <button class="btn-confirm" onclick="printReceipt()" style="background: var(--main-blue);">🖨️ Print Receipt</button>
@@ -950,6 +1162,28 @@
         
         // Initialize lock button
         updateLockButton();
+        
+        // Check for logo.jpeg and load if exists
+        loadLogo();
+    }
+    
+    function loadLogo() {
+        // Try to load logo from server
+        const logoImg = new Image();
+        logoImg.onload = function() {
+            // If logo loads successfully, replace placeholder with image
+            const logoPlaceholder = document.getElementById('logoPlaceholder');
+            logoPlaceholder.innerHTML = '';
+            logoPlaceholder.style.backgroundImage = `url('logo.jpeg')`;
+            logoPlaceholder.style.backgroundSize = 'cover';
+            logoPlaceholder.style.backgroundPosition = 'center';
+            logoPlaceholder.style.color = 'transparent';
+        };
+        logoImg.onerror = function() {
+            // If logo doesn't exist, keep the placeholder
+            console.log("Logo not found, using placeholder");
+        };
+        logoImg.src = 'logo.jpeg';
     }
 
     function saveToStorage() {
@@ -1120,7 +1354,7 @@
         const body = document.getElementById('stockHistoryBody');
         let totalInvestment = 0;
         let totalItems = 0;
-        body.innerHTML = stockHistory.map(log => {
+        body.innerHTML = stockHistory.map((log, index) => {
             totalInvestment += log.totalCost;
             totalItems += log.qty;
             return `<tr>
@@ -1129,10 +1363,36 @@
                     <td style="color: var(--success-green); font-weight: bold;">+${log.qty}</td>
                     <td>${log.unitCost.toFixed(2)}</td>
                     <td>${log.totalCost.toFixed(2)}</td>
+                    <td>
+                        <button class="stock-history-delete" onclick="deleteStockHistory(${index})" title="Delete this stock entry">
+                            🗑️
+                        </button>
+                    </td>
                 </tr>`;
         }).join('');
         document.getElementById('totalStockInvestment').innerText = "Rs. " + totalInvestment.toFixed(2);
         document.getElementById('totalStockItemsAdded').innerText = totalItems;
+    }
+    
+    function deleteStockHistory(index) {
+        if (isLocked) {
+            alert("මකාදැමීමට පද්ධතිය Unlock කරන්න! Admin PIN අවශ්‍යයි.");
+            openSecurityPopup();
+            return;
+        }
+        
+        const logEntry = stockHistory[index];
+        
+        if (confirm(`මෙම ස්ටොක් ඉතිහාස ඇතුළත් කිරීම මකා දැමීමට අවශ්‍යද?\n\nඅයිතමය: ${logEntry.itemName}\nප්‍රමාණය: ${logEntry.qty}\nදිනය: ${logEntry.date}`)) {
+            // Remove from stock history
+            stockHistory.splice(index, 1);
+            
+            // Save changes
+            saveToStorage();
+            renderStockHistory();
+            
+            alert("ස්ටොක් ඉතිහාස ඇතුළත් කිරීම සාර්ථකව මකා දමන ලදී!");
+        }
     }
 
     /* --- POS CART LOGIC --- */
@@ -1502,7 +1762,7 @@
         }
         
         recentList.innerHTML = recentReceipts.map(receipt => `
-            <div class="receipt-card" onclick="viewReceiptDetails(${receipt.receiptId})" style="cursor:pointer; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+            <div class="receipt-card" onclick="viewReceiptDetails(${receipt.receiptId})" style="cursor:pointer; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <div style="font-weight:bold;">Receipt #${receipt.receiptId}</div>
@@ -1607,13 +1867,13 @@
         const resultsDiv = document.getElementById('receiptsResults');
         
         resultsDiv.innerHTML = `
-            <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
+            <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-secondary); border-radius: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="font-weight: bold; color: var(--main-blue);">
                         ${searchTerm ? 'Search Results for ID: ' + searchTerm : 'Recent Receipts'}
                         <span style="font-size: 14px; color: #666;"> (${receipts.length} receipts found)</span>
                     </div>
-                    <button class="btn" style="background: #607d8b; color: white; padding: 5px 10px; font-size: 12px;" onclick="displayAllRecentReceipts()">
+                    <button class="btn" style="background: #607d8b; color: white; padding: 5px 10px; font-size: 12px; border-radius: 6px;" onclick="displayAllRecentReceipts()">
                         Show All Receipts
                     </button>
                 </div>
